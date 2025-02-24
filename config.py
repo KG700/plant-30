@@ -7,5 +7,6 @@ logger.setLevel(logging.DEBUG)
 class Settings(BaseSettings):
     username: str
     password: str
+    mongodb_uri: str
     
     model_config = SettingsConfigDict(env_file=".env")

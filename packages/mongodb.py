@@ -15,10 +15,9 @@ async def lifespan(app: FastAPI):
 async def startup_db_client(app):
     username = settings.username
     password = settings.password
+    cluster = settings.mongodb_uri
 
-    app.mongodb_client = AsyncIOMotorClient(
-        'mongodb+srv://%s:%s@cluster0.pvjho.mongodb.net/' % (username, password))
-
+    app.mongodb_client = AsyncIOMotorClient('mongodb+srv://%s:%s@%s/' % (username, password, cluster))
     app.mongodb = app.mongodb_client.get_database("plants30")
     print("MongoDB connected.")
 
