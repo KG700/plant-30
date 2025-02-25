@@ -1,5 +1,6 @@
 from enum import Enum
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, Field
 
 class PlantCategory(str, Enum):
     fruit = "fruit"
@@ -12,6 +13,6 @@ class PlantCategory(str, Enum):
     pulses = "pulses"
 
 class Plant(BaseModel):
-    id: str | None = None
+    id: str | None = Field(alias="_id", default=None)
     name: str
     category: PlantCategory
