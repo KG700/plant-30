@@ -1,5 +1,6 @@
-from bson import ObjectId
 from fastapi import FastAPI
+from bson import ObjectId
+from datetime import date
 from config import logger
 from packages.mongodb import lifespan
 from packages.models import Plant
@@ -12,10 +13,12 @@ async def create_plant(plant: Plant) -> Plant:
     plant.id = str(new_plant.inserted_id)
     return plant
 
-@app.post("/add-plant/{userId}", response_model=Plant)
-async def add_plant(userId: str, plant: Plant):
-    todays_date = '25-02-2025'
+@app.post("/user/{userId}/add-plant/{plantId}")
+async def add_plant(userId: str, plantId: str):    
+    plant_to_add = await app.mongodb['plants'].find_one( {'_id': ObjectId(plantId) } )
+    
+    todays_date = date.today().strftime('%d-%m-%Y')
     plant_key = 'plants.%s' % todays_date
-
-    await app.mongodb['users'].update_one( { '_id': ObjectId(userId) }, { '$push': { plant_key: plant.model_dump() } }, upsert=True )
-    return plant
+    
+    await app.mongodb['users'].update_one( { '_id': ObjectId(userId) }, { '$addToSet': { plant_key: plant_to_add } }, upsert=True )
+    return 200
