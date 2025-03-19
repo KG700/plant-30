@@ -20,7 +20,7 @@ async def startup_db_client(app):
     cluster = settings.mongodb_uri
 
     app.mongodb_client = AsyncIOMotorClient(
-        "mongodb+srv://%s:%s@%s/" % (username, password, cluster)
+        "mongodb+srv://{}:{}@{}/".format(username, password, cluster)
     )
     app.mongodb = app.mongodb_client.get_database("plants30")
     print("MongoDB connected.")

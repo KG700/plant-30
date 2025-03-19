@@ -1,7 +1,7 @@
 fastapi[standard]
-uvicorn[standard]
 motor
+pre-commit
 pydantic
 pydantic-settings
 python-dotenv
-pre-commit
+uvicorn[standard]
