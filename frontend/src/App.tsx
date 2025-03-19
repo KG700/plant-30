@@ -28,6 +28,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <h2>Plants eaten today:</h2>
         <ul>
           { plants.map((plant) => {
             return <li key={plant.id}>{ plant.name }</li>
