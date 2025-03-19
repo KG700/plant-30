@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     fetch('http://127.0.0.1:8000/user/67bc93477fcac69fbfe17d44/plants?when=today', {
       headers: {
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': 'http://localhost:3000'
       }
     }).then((response) => {
       return response.json()
