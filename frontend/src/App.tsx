@@ -19,7 +19,7 @@ function App() {
       return await data.json()
     }
 
-    const plants = fetchPlants()
+    fetchPlants()
       .then((data) => setPlants(data))
       .catch(() => setPlants([{ id: 'error', name: 'Error fetching plants', category: 'error' }]))
   }, []);
