@@ -27,24 +27,24 @@ async def create_plant(plant: Plant) -> Plant:
     
     return plant
 
-@app.post("/user/{userId}/add-plant/{plantId}")
-async def add_plant(userId: str, plantId: str):    
-    plant_to_add = await app.mongodb['plants'].find_one( {'_id': ObjectId(plantId) }, { '_id': 0 } )
-    plant_to_add['id'] = plantId
+@app.post("/user/{user_id}/add-plant/{plant_id}")
+async def add_plant(user_id: str, plant_id: str):   
+    plant_to_add = await app.mongodb['plants'].find_one( {'_id': ObjectId(plant_id) }, { '_id': 0 } )
+    plant_to_add['id'] = plant_id
     todays_date = date.today().strftime('%d-%m-%Y')
     plant_key = 'plants.%s' % todays_date
     
-    await app.mongodb['users'].update_one( { '_id': ObjectId(userId) }, { '$addToSet': { plant_key: plant_to_add } }, upsert=True )
+    await app.mongodb['users'].update_one( { '_id': ObjectId(user_id) }, { '$addToSet': { plant_key: plant_to_add } }, upsert=True )
     
     return 200
 
-@app.get('/user/{userId}/plants')
-async def get_plants(userId: str, when: str = 'today' ):
+@app.get('/user/{user_id}/plants')
+async def get_plants(user_id: str, when: str = 'today' ):
     todays_date = date.today().strftime('%d-%m-%Y')
     
     if when == 'today':
         plant_key = 'plants.%s' % todays_date
     
-    list_of_plants = await app.mongodb['users'].find_one( { '_id': ObjectId(userId) }, { '_id': 0, plant_key: 1 } )
+    list_of_plants = await app.mongodb['users'].find_one( { '_id': ObjectId(user_id) }, { '_id': 0, plant_key: 1 } )
 
     return list_of_plants['plants'][todays_date]
