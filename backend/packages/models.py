@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
 
+
 class PlantCategory(str, Enum):
     fruit = "fruit"
     vegetable = "vegetable"
@@ -11,6 +12,7 @@ class PlantCategory(str, Enum):
     spice = "spice"
     beans = "beans"
     pulses = "pulses"
+
 
 class Plant(BaseModel):
     id: str | None = Field(alias="_id", default=None)
