@@ -14,7 +14,7 @@ describe('App', () => {
       })
     );
   })
-  
+
   it('fetches and renders plants', async () => {
     render(<App />);
 
