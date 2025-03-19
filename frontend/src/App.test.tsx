@@ -1,9 +1,26 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+describe('App', () => {
+
+  beforeEach(() => {
+    (global.fetch as jest.Mock) = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve([
+          { id: 1, name: 'rice' },
+          { id: 2, name: 'onion' },
+        ]),
+      })
+    );
+  })
+  
+  it('fetches and renders plants', async () => {
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('rice')).toBeInTheDocument();
+      expect(screen.getByText('onion')).toBeInTheDocument();
+    });
+  });
 });
