@@ -1,4 +1,5 @@
 export interface Plant {
-    name?: string;
-    category?: string
+    id: string;
+    name: string;
+    category: string
 }

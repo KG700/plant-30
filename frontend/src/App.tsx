@@ -5,7 +5,9 @@ import './App.css';
 function App() {
 
   const [plants, setPlants] = useState<Plant[]>([]);
-  // TODO: need to get the user_id somehow - probably taken from the url and saved into the state.
+  // TODO: need to get the userId somehow - probably taken from the url and saved into the state.
+  // TODO: move the baseUrl into a configurable variable - changes by environment
+  // TODO: move the origin into a configurable variable - changes by environment
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/user/67bc93477fcac69fbfe17d44/plants?when=today', {
@@ -26,7 +28,7 @@ function App() {
       <header className="App-header">
         <ul>
           { plants.map((plant) => {
-            return <li>{ plant.name }</li>
+            return <li key={plant.id}>{ plant.name }</li>
           }) }
         </ul>
       </header>

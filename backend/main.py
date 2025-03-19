@@ -30,6 +30,7 @@ async def create_plant(plant: Plant) -> Plant:
 @app.post("/user/{userId}/add-plant/{plantId}")
 async def add_plant(userId: str, plantId: str):    
     plant_to_add = await app.mongodb['plants'].find_one( {'_id': ObjectId(plantId) }, { '_id': 0 } )
+    plant_to_add['id'] = plantId
     todays_date = date.today().strftime('%d-%m-%Y')
     plant_key = 'plants.%s' % todays_date
     
