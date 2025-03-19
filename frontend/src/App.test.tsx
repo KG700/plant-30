@@ -23,4 +23,14 @@ describe('App', () => {
       expect(screen.getByText('onion')).toBeInTheDocument();
     });
   });
+
+  it('throws error if plants fail to fetch', async () => {
+    (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Error fetching plants')).toBeInTheDocument();
+    });
+  })
 });
