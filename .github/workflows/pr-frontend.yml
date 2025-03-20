@@ -1,0 +1,20 @@
+name: Frontend Pull Request
+run-name: ${{ github.actor }} is raising a Pull Request for the frontend 🚀
+on:
+    pull_request:
+        paths:
+            - 'frontend/**'
+jobs:
+  run-build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install
+      - name: Run unit tests
+        working-directory: ./frontend
+        run: npm test
+      - run: echo "🍏 This job's status is ${{ job.status }}."
