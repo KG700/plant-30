@@ -19,7 +19,6 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      render(<App />);
       const todayView = screen.getByTestId('today-view');
       expect(todayView).toBeInTheDocument();
     });
