@@ -16,7 +16,7 @@ jobs:
         run: npm install
       - name: Run unit tests
         working-directory: ./frontend
-        run: npm test -- --coverage --watchAll
+        run: npm test -- --coverage
       - run: echo "🍏 This job's status is ${{ job.status }}."
   sonarqube:
     needs: run-build
