@@ -21,6 +21,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByText('rice')).toBeInTheDocument();
       expect(screen.getByText('onion')).toBeInTheDocument();
+      expect(screen.getByText('Number of plants eaten today: 2')).toBeInTheDocument();
     });
   });
 
