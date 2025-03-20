@@ -1,7 +1,7 @@
 name: Frontend Pull Request
 run-name: ${{ github.actor }} is raising a Pull Request for the frontend 🚀
 on:
-    push:
+    pull_request:
         paths:
             - 'frontend/**'
 jobs:
