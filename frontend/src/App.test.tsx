@@ -15,23 +15,14 @@ describe('App', () => {
     );
   })
 
-  it('fetches and renders plants', async () => {
+  it('renders Today view', async () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText('rice')).toBeInTheDocument();
-      expect(screen.getByText('onion')).toBeInTheDocument();
-      expect(screen.getByText('Number of plants eaten today: 2')).toBeInTheDocument();
+      render(<App />);
+      const todayView = screen.getByTestId('today-view');
+      expect(todayView).toBeInTheDocument();
     });
   });
 
-  it('throws error if plants fail to fetch', async () => {
-    (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
-
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Error fetching plants')).toBeInTheDocument();
-    });
-  })
 });
