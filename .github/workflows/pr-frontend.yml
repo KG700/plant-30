@@ -19,6 +19,7 @@ jobs:
         run: npm test -- --coverage --watchAll
       - run: echo "🍏 This job's status is ${{ job.status }}."
   sonarqube:
+    needs: run-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
