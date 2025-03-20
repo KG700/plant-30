@@ -20,7 +20,9 @@ function App() {
     }
 
     fetchPlants()
-      .then((data) => setPlants(data))
+      .then((data) => {
+        setPlants(data)
+      })
       .catch(() => setPlants([{ id: 'error', name: 'Error fetching plants', category: 'error' }]))
   }, []);
 
@@ -28,6 +30,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <h2>Number of plants eaten today: {plants.length}</h2>
         <h2>Plants eaten today:</h2>
         <ul>
           { plants.map((plant) => {
