@@ -19,6 +19,9 @@ jobs:
       - name: Run unit tests
         working-directory: ./frontend
         run: npm test -- --coverage
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
