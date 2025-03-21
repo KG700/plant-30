@@ -11,23 +11,20 @@ jobs:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
       - name: Check out repository code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install dependencies
         working-directory: ./frontend
         run: npm install
       - name: Run unit tests
         working-directory: ./frontend
         run: npm test -- --coverage
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-  sonarqube:
-    needs: run-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-        # Disabling shallow clones is recommended for improving the relevancy of reporting
-          fetch-depth: 0
+      - name: List files in the repository
+        run: |
+          cat ${{ github.workspace }}/frontend/coverage/lcov.info
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
