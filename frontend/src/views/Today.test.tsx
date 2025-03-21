@@ -25,6 +25,21 @@ describe('Today', () => {
         });
       });
 
+      it('shows no plants added message if no plants are fetched', async () => {
+        (global.fetch as jest.Mock) = jest.fn(() =>
+          Promise.resolve({
+            json: () => Promise.resolve([]),
+          })
+        );
+
+        render(<Today />);
+
+        await waitFor(() => {
+          expect(screen.getByText('Number of plants eaten today: 0')).toBeInTheDocument();
+          expect(screen.getByText('You have not added any plants for today yet')).toBeInTheDocument();
+        });
+      });
+
       it('throws error if plants fail to fetch', async () => {
         (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
 

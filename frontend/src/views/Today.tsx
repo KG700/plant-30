@@ -30,11 +30,16 @@ export function Today() {
     <header className="App-header">
       <h2>Number of plants eaten today: {plants.length}</h2>
       <h2>Plants eaten today:</h2>
-      <ul>
-        { plants.map((plant) => {
-          return <li key={plant.id}>{ plant.name }</li>
-        }) }
-      </ul>
+      {plants.length ? (
+        <ul>
+          { plants.map((plant) => {
+            return <li key={plant.id}>{ plant.name }</li>
+          }) }
+        </ul>
+        ) : (
+          <p>You have not added any plants for today yet</p>
+        )
+      }
     </header>
   </div>
   )
