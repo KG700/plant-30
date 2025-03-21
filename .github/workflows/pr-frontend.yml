@@ -21,7 +21,7 @@ jobs:
         run: npm test -- --coverage
       - name: List files in the repository
         run: |
-          ls ${{ github.workspace }}/frontend
+          ls ${{ github.workspace }}/frontend/coverage
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
