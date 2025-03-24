@@ -50,7 +50,7 @@ describe('Today', () => {
         });
       })
 
-      it('', async () => {
+      it('submits plant when entered', async () => {
         const userId = '67bc93477fcac69fbfe17d44';
         const plantId = '67bdca3d86bc1187fad97937';
 
@@ -74,6 +74,28 @@ describe('Today', () => {
               method: 'POST',
             }
           );
+        })
+      })
+
+      it('displays error and does not submit plant when nothing is entered', async () => {
+
+        render(<Today />);
+
+        const inputField = screen.getByLabelText('enter-plant');
+        const submitButton = screen.getByRole('button', { name: /Submit/i });
+
+        act(() => {
+          fireEvent.change(inputField, { target: { value: '' } });
+          fireEvent.click(submitButton);
+        })
+
+        await waitFor(() => {
+          expect(global.fetch).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+              method: "POST"
+            })
+          );
+          expect(screen.getByText('Error, must enter a plant before submitting'))
         })
       })
 })
