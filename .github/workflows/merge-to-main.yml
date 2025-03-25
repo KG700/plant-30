@@ -1,0 +1,59 @@
+name: Merging to Main
+run-name: ${{ github.actor }} is merging a Pull Request to the Main branch 🚀
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        # with:
+        #   python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        working-directory: ./backend
+        run: coverage run -m pytest --asyncio-mode=auto
+      - name: Create coverage report
+        working-directory: ./backend
+        run: coverage xml
+      - name: List files in the repository
+        run: |
+          cat ${{ github.workspace }}/backend/coverage.xml
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install
+      - name: Run unit tests
+        working-directory: ./frontend
+        run: npm test -- --coverage
+      - name: List files in the repository
+        run: |
+          cat ${{ github.workspace }}/frontend/coverage/lcov.info
+  run-sonar-scan:
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
