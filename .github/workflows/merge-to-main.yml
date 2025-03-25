@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 jobs:
-  build-backend:
+  build:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
@@ -32,9 +32,9 @@ jobs:
       - name: List files in the repository
         run: |
           cat ${{ github.workspace }}/backend/coverage.xml
-  build-frontend:
-    runs-on: ubuntu-latest
-    steps:
+  # build-frontend:
+  #   runs-on: ubuntu-latest
+  #   steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -49,10 +49,10 @@ jobs:
       - name: List files in the repository
         run: |
           cat ${{ github.workspace }}/frontend/coverage/lcov.info
-  run-sonar-scan:
-    needs: [build-backend, build-frontend]
-    runs-on: ubuntu-latest
-    steps:
+  # run-sonar-scan:
+  #   needs: [build-backend, build-frontend]
+  #   runs-on: ubuntu-latest
+  #   steps:
       - name: List files in the repository
         run: ls ${{ github.workspace }}
           # ls ${{ github.workspace }}/frontend
