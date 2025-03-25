@@ -54,9 +54,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}/frontend
-          ls ${{ github.workspace }}/backend
+        run: ls ${{ github.workspace }}
+          # ls ${{ github.workspace }}/frontend
+          # ls ${{ github.workspace }}/backend
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
