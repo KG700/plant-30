@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - run: echo "🍏 Building the backend"
       - name: Setup Python
         uses: actions/setup-python@v3
         # with:
@@ -32,14 +33,7 @@ jobs:
       - name: List files in the repository
         run: |
           cat ${{ github.workspace }}/backend/coverage.xml
-  # build-frontend:
-  #   runs-on: ubuntu-latest
-  #   steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event, for the branch ${{ github.ref }}."
-      - name: Check out repository code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - run: echo "🍏 Building the frontend"
       - name: Install dependencies
         working-directory: ./frontend
         run: npm install
@@ -49,14 +43,11 @@ jobs:
       - name: List files in the repository
         run: |
           cat ${{ github.workspace }}/frontend/coverage/lcov.info
-  # run-sonar-scan:
-  #   needs: [build-backend, build-frontend]
-  #   runs-on: ubuntu-latest
-  #   steps:
+      - run: echo "🍏 Running the sonar scan"
       - name: List files in the repository
-        run: ls ${{ github.workspace }}
-          # ls ${{ github.workspace }}/frontend
-          # ls ${{ github.workspace }}/backend
+        run: |
+          ls ${{ github.workspace }}/frontend
+          ls ${{ github.workspace }}/backend
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
