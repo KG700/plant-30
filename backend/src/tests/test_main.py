@@ -29,6 +29,16 @@ def client(mock_mongo, monkeypatch):
         yield client
 
 
+async def test_create_plant(client):
+    plant_data = {"name": "apple", "category": "fruit"}
+    response = client.post("/create-plant", json=plant_data)
+
+    id = response.json()["_id"]
+
+    assert response.status_code == 200
+    assert response.json() == {"_id": id, "name": "apple", "category": "fruit"}
+
+
 async def test_add_plant(client, mock_mongo):
     user_id = "67bc93477fcac69fbfe17d44"
     plant_id = "67bdca3d86bc1187fad97937"
