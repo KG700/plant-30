@@ -1,3 +1,4 @@
+coverage
 fastapi[standard]
 motor
 pre-commit
