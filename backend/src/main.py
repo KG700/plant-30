@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import date
-from config import logger
-from packages.mongodb import lifespan
-from packages.models import Plant
+from src.packages.config import logger
+from src.packages.mongodb import lifespan
+from src.packages.models import Plant
 
 app = FastAPI(lifespan=lifespan)
 
@@ -32,6 +32,10 @@ async def add_plant(user_id: str, plant_id: str):
     plant_to_add = await app.mongodb["plants"].find_one(
         {"_id": ObjectId(plant_id)}, {"_id": 0}
     )
+
+    # TODO: what happens if plant_id doesn't exist?
+
+    plant_to_add = dict(plant_to_add)
     plant_to_add["id"] = plant_id
     todays_date = date.today().strftime("%d-%m-%Y")
     plant_key = "plants.%s" % todays_date
@@ -42,7 +46,7 @@ async def add_plant(user_id: str, plant_id: str):
         upsert=True,
     )
 
-    return 200
+    return plant_to_add
 
 
 @app.get("/user/{user_id}/plants")

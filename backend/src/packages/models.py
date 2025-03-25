@@ -12,6 +12,7 @@ class PlantCategory(str, Enum):
     spice = "spice"
     beans = "beans"
     pulses = "pulses"
+    legumes = "legumes"
 
 
 class Plant(BaseModel):

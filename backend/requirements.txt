@@ -1,7 +1,10 @@
+coverage
 fastapi[standard]
+mongomock_motor
 motor
 pre-commit
 pydantic
 pydantic-settings
+pytest-asyncio
 python-dotenv
 uvicorn[standard]

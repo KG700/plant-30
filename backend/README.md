@@ -23,3 +23,8 @@ uvicorn main:app --reload --log-level debug
 ```
 deactivate
 ```
+### Running backend unit tests
+```
+cd backend
+pytest --asyncio-mode=auto
+```
