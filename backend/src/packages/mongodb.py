@@ -1,11 +1,10 @@
 from fastapi import FastAPI
-from config import Settings
+from src.packages.config import get_settings
 from motor.motor_asyncio import AsyncIOMotorClient
 from contextlib import asynccontextmanager
 
-settings = Settings()
 
-
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     # Start the database connection
     await startup_db_client(app)
@@ -15,9 +14,9 @@ async def lifespan(app: FastAPI):
 
 
 async def startup_db_client(app):
-    username = settings.username
-    password = settings.password
-    cluster = settings.mongodb_uri
+    username = get_settings().username
+    password = get_settings().password
+    cluster = get_settings().mongodb_uri
 
     app.mongodb_client = AsyncIOMotorClient(
         "mongodb+srv://{}:{}@{}/".format(username, password, cluster)

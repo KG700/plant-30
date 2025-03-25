@@ -25,10 +25,6 @@ repos:
     rev: v3.19.1
     hooks:
     -   id: pyupgrade
--   repo: https://github.com/hhatto/autopep8
-    rev: v2.3.2
-    hooks:
-    -   id: autopep8
 -   repo: https://github.com/gitleaks/gitleaks
     rev: v8.23.1
     hooks:
