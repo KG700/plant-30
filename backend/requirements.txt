@@ -1,5 +1,6 @@
 coverage
 fastapi[standard]
+mongomock_motor
 motor
 pre-commit
 pydantic
