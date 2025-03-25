@@ -37,4 +37,6 @@ async def test_add_plant(client, mock_mongo):
     await mock_mongo.db["plants"].insert_one(plant_data)
 
     response = client.post(f"/user/{user_id}/add-plant/{plant_id}")
+
     assert response.status_code == 200
+    assert response.json() == {"id": plant_id, "name": "apple", "category": "fruit"}

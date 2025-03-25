@@ -46,7 +46,7 @@ async def add_plant(user_id: str, plant_id: str):
         upsert=True,
     )
 
-    return 200
+    return plant_to_add
 
 
 @app.get("/user/{user_id}/plants")
