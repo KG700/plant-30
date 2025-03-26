@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import date
@@ -25,6 +26,16 @@ async def create_plant(plant: Plant) -> Plant:
     plant.id = str(new_plant.inserted_id)
 
     return plant
+
+
+@app.get("/plants/all")
+async def get_all_plants():
+    plants = await app.mongodb["plants"].find({}).to_list(1000)
+
+    for plant in plants:
+        plant["_id"] = str(plant["_id"])
+
+    return jsonable_encoder(plants)
 
 
 @app.post("/user/{user_id}/add-plant/{plant_id}")

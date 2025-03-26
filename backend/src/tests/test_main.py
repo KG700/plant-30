@@ -39,6 +39,17 @@ async def test_create_plant(client):
     assert response.json() == {"_id": id, "name": "apple", "category": "fruit"}
 
 
+async def test_get_all_plants(client, mock_mongo):
+    plant_data = {"name": "apple", "category": "fruit"}
+    await mock_mongo.db["plants"].insert_one(plant_data)
+
+    response = client.get("/plants/all")
+    plant_id = response.json()[0]["_id"]
+
+    assert response.status_code == 200
+    assert response.json() == [{"_id": plant_id, "name": "apple", "category": "fruit"}]
+
+
 async def test_add_plant(client, mock_mongo):
     user_id = "67bc93477fcac69fbfe17d44"
     plant_id = "67bdca3d86bc1187fad97937"
