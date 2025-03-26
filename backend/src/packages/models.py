@@ -1,6 +1,13 @@
 from enum import Enum
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import Annotated
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    root_validator,
+)
 
 
 class PlantCategory(str, Enum):
@@ -16,6 +23,7 @@ class PlantCategory(str, Enum):
 
 
 class Plant(BaseModel):
-    id: str | None = Field(alias="_id", default=None)
+    id: Annotated[str, BeforeValidator(str)] = Field(alias="_id", default=None)
     name: str
     category: PlantCategory
+    model_config = ConfigDict(populate_by_name=True)

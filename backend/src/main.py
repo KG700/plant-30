@@ -20,12 +20,14 @@ app.add_middleware(
 )
 
 
-@app.post("/create-plant", response_model=Plant)
-async def create_plant(plant: Plant) -> Plant:
-    new_plant = await app.mongodb["plants"].insert_one(plant.model_dump())
-    plant.id = str(new_plant.inserted_id)
+@app.post("/create-plant", response_model=Plant, status_code=201)
+async def create_plant(plant: Plant):
+    new_plant = await app.mongodb["plants"].insert_one(
+        plant.model_dump(by_alias=True, exclude=["id"])
+    )
+    created_plant = await app.mongodb["plants"].find_one({"_id": new_plant.inserted_id})
 
-    return plant
+    return Plant(**created_plant)
 
 
 @app.get("/plants/all")

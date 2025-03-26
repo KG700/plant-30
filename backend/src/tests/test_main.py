@@ -35,7 +35,7 @@ async def test_create_plant(client):
 
     id = response.json()["_id"]
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json() == {"_id": id, "name": "apple", "category": "fruit"}
 
 
