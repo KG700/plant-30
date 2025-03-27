@@ -33,7 +33,6 @@ export function EnterPlantInput() {
     }, [enteredPlant]);
 
   useEffect(() => {
-    console.log(closeDropDownOnClick)
     const closeDropDownOnClickFn = (event: any) => {
       if(dropDownOpen && !closeDropDownOnClick.current?.contains(event.target)) {
         setDropDownOpen(false)
@@ -71,7 +70,7 @@ export function EnterPlantInput() {
         {enteredPlantError && <p>{enteredPlantError}</p>}
         {isError && <p>Error fetching plants</p>}
         {dropDownOpen &&
-        <ul className="dropdown">
+        <ul className="dropdown" data-testid="plant-dropdown">
           { plantList.map((plant) => {
             return <li key={plant._id} className="dropdown-items"><a onClick={() => submitPlant(plant)}>{ plant.name }</a></li>
           }) }

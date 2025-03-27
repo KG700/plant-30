@@ -8,8 +8,8 @@ describe('Today', () => {
         (global.fetch as jest.Mock) = jest.fn(() =>
           Promise.resolve({
             json: () => Promise.resolve([
-              { id: 1, name: 'rice' },
-              { id: 2, name: 'onion' },
+              { _id: 1, name: 'rice' },
+              { _id: 2, name: 'onion' },
             ]),
           })
         );
@@ -46,7 +46,7 @@ describe('Today', () => {
         render(<Today />);
 
         await waitFor(() => {
-          expect(screen.getByText('Error fetching plants')).toBeInTheDocument();
+          expect(screen.getByText('Error fetching the plants you have eaten today')).toBeInTheDocument();
         });
       })
 })

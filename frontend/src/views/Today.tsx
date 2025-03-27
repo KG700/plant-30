@@ -30,7 +30,7 @@ export function Today() {
 
   function listPlants() {
     if (isError) {
-      return (<p>Error fetching plants</p>)
+      return (<p>Error fetching the plants you have eaten today</p>)
     }
 
     if (plants.length === 0) {
