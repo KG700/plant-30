@@ -52,7 +52,7 @@ describe('EnterPlantInput', () => {
               method: "POST"
             })
           );
-          expect(screen.getByText('Error, must enter a plant before submitting'))
+          expect(screen.getByText('Error, must enter a plant before submitting')).toBeInTheDocument();
         })
       })
 });
