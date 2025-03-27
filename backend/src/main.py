@@ -30,9 +30,20 @@ async def create_plant(plant: Plant):
     return Plant(**created_plant)
 
 
-@app.get("/plants/all")
-async def get_all_plants():
-    plants = await app.mongodb["plants"].find({}).to_list(1000)
+@app.get("/plants/search")
+async def search_all_plants(q: str):
+    plants = (
+        await app.mongodb["plants"]
+        .find(
+            {
+                "$or": [
+                    {"name": {"$regex": q, "$options": "i"}},
+                    {"category": {"$regex": q, "$options": "i"}},
+                ]
+            }
+        )
+        .to_list(10)
+    )
 
     for plant in plants:
         plant["_id"] = str(plant["_id"])

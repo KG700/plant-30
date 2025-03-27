@@ -40,7 +40,7 @@ export function Today() {
     return (
       <ul>
         { plants.map((plant) => {
-          return <li key={plant.id}>{ plant.name }</li>
+          return <li key={plant._id}>{ plant.name }</li>
         }) }
       </ul>
       )
