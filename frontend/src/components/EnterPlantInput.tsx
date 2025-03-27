@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useEffect } from "react";
+import { useState, MouseEvent, useEffect, useRef } from "react";
 import { Plant } from "../types";
 
 export function EnterPlantInput() {
@@ -6,6 +6,9 @@ export function EnterPlantInput() {
     const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
     const [enteredPlantError, setEnteredPlantError] = useState('')
+    const [dropDownOpen, setDropDownOpen] = useState(false)
+
+    const closeDropDownOnClick = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
       const fetchPlants = async () => {
@@ -29,18 +32,29 @@ export function EnterPlantInput() {
       })
     }, [enteredPlant]);
 
-    async function submitPlant(event: MouseEvent<HTMLButtonElement>) {
-        //TODO: Needs to retrieve the correct plant_id
-        //TODO: Needs error handling if fetch fails
+  useEffect(() => {
+    console.log(closeDropDownOnClick)
+    const closeDropDownOnClickFn = (event: any) => {
+      if(dropDownOpen && !closeDropDownOnClick.current?.contains(event.target)) {
+        setDropDownOpen(false)
+      }
+    }
+    document.addEventListener("click", closeDropDownOnClickFn)
+  }, [closeDropDownOnClick, dropDownOpen]);
 
-        event.preventDefault();
+    function openDropDown() {
+      setDropDownOpen(true)
+    }
 
-        if (!enteredPlant) {
-          setEnteredPlantError('Error, must enter a plant before submitting')
-          return;
-        }
-        setEnteredPlantError('')
-        await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/67bdca3d86bc1187fad97937`, {
+    function closeDropDown() {
+      setDropDownOpen(false)
+    }
+
+    async function submitPlant(plant: Plant) {
+      closeDropDown();
+      setEnteredPlant("")
+        //TODO: Needs error handling if fetch fails or if plant has already been added?
+        await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/${plant._id}`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
           },
@@ -49,20 +63,20 @@ export function EnterPlantInput() {
       }
 
     return (
-        <div>
+        <div ref={closeDropDownOnClick}>
             <form>
-                <label>
-                    Enter plant: <input type="text" aria-label="enter-plant" value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} />
-                </label>
-                <button type="submit" onClick={(event) => submitPlant(event)}>Submit</button>
+              <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
+                {/* <button type="submit" onClick={(event) => submitPlant(event)}>Submit</button> */}
             </form>
         {enteredPlantError && <p>{enteredPlantError}</p>}
         {isError && <p>Error fetching plants</p>}
-        <ul>
+        {dropDownOpen &&
+        <ul className="dropdown">
           { plantList.map((plant) => {
-            return <li key={plant._id}>{ plant.name }</li>
+            return <li key={plant._id} className="dropdown-items"><a onClick={() => submitPlant(plant)}>{ plant.name }</a></li>
           }) }
         </ul>
+}
       </div>
     )
 }

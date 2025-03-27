@@ -11,3 +11,28 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.dropdown {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  color: black;
+}
+
+.dropdown-items {
+  padding: 0.5rem;
+  margin: 0.1rem;
+  /* width: 100%; */
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.dropdown-items:hover {
+  background-color: rgb(240, 240, 240);
+}
