@@ -1,11 +1,11 @@
-import { useState, MouseEvent, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plant } from "../types";
 
 export function EnterPlantInput() {
     const [plantList, setPlantList] = useState<Plant[]>([]);
     const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
-    const [enteredPlantError, setEnteredPlantError] = useState('')
+    // const [enteredPlantError, setEnteredPlantError] = useState('')
     const [dropDownOpen, setDropDownOpen] = useState(false)
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
@@ -65,9 +65,8 @@ export function EnterPlantInput() {
         <div ref={closeDropDownOnClick}>
             <form>
               <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
-                {/* <button type="submit" onClick={(event) => submitPlant(event)}>Submit</button> */}
             </form>
-        {enteredPlantError && <p>{enteredPlantError}</p>}
+        {/* {enteredPlantError && <p>{enteredPlantError}</p>} */}
         {isError && <p>Error fetching plants</p>}
         {dropDownOpen &&
         <ul className="dropdown" data-testid="plant-dropdown">

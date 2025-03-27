@@ -20,10 +20,8 @@ describe('EnterPlantInput', () => {
 
         render(<EnterPlantInput />);
 
-        act(() => {
-          const inputField = screen.getByLabelText('enter-plant');
-          fireEvent.click(inputField);
-        })
+        const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
 
         waitFor(() => {
           const appleListItem = screen.getByText('apple');
@@ -41,5 +39,61 @@ describe('EnterPlantInput', () => {
             }
           );
         })
+        expect(screen.queryByTestId('plant-dropdown')).not.toBeInTheDocument();
+        expect(inputField.value).toBe('');
       })
+
+      it('updates enteredPlant state when input changes', () => {
+        render(<EnterPlantInput />);
+        const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
+        fireEvent.change(inputField, { target: { value: 'app' } });
+        expect(inputField.value).toBe('app');
+      });
+
+      it('opens the dropdown when input is clicked', async () => {
+        render(<EnterPlantInput />);
+        const inputField = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+        await waitFor(() => {
+          expect(screen.getByTestId('plant-dropdown')).toBeVisible();
+        });
+      });
+
+      it('closes the dropdown when clicking outside', async () => {
+        render(<EnterPlantInput />);
+        const inputField = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+        await waitFor(() => {
+          expect(screen.getByTestId('plant-dropdown')).toBeVisible();
+        });
+        fireEvent.click(document.body); // Simulate click outside
+        expect(screen.queryByTestId('plant-dropdown')).not.toBeInTheDocument();
+      });
+
+      it('fetches plants when input changes', async () => {
+        render(<EnterPlantInput />);
+
+        const inputField = screen.getByLabelText('enter-plant');
+        fireEvent.change(inputField, { target: { value: 'ap' } });
+
+        await waitFor(() => {
+          expect(global.fetch).toHaveBeenCalledWith(
+            `${process.env.REACT_APP_BASE_URL}/plants/search?q=ap`,
+            expect.any(Object)
+          );
+        });
+      });
+
+      it('displays error message if fetching plants fails', async () => {
+        (global.fetch as jest.Mock) = jest.fn(() => Promise.reject('Fetch Error'));
+
+        render(<EnterPlantInput />);
+
+        const inputField = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+
+        await waitFor(() => {
+          expect(screen.getByText('Error fetching plants')).toBeVisible();
+        });
+      });
 });
