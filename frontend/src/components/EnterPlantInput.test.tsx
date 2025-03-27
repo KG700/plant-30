@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { EnterPlantInput } from "./EnterPlantInput";
-import userEvent from "@testing-library/user-event";
 
 describe('EnterPlantInput', () => {
 
