@@ -1,5 +1,5 @@
 export interface Plant {
-    id: string;
+    _id: string;
     name: string;
     category: string
 }

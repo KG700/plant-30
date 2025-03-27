@@ -1,21 +1,70 @@
-import { useState, MouseEvent } from "react";
+import { useState, useEffect, useRef, KeyboardEvent } from "react";
+import { Plant } from "../types";
 
 export function EnterPlantInput() {
+    const [plantList, setPlantList] = useState<Plant[]>([]);
+    const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
-    const [enteredPlantError, setEnteredPlantError] = useState('')
+    // const [enteredPlantError, setEnteredPlantError] = useState('')
+    const [dropDownOpen, setDropDownOpen] = useState(false)
 
-    async function submitPlant(event: MouseEvent<HTMLButtonElement>) {
-        //TODO: Needs to retrieve the correct plant_id
+    const closeDropDownOnClick = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      const fetchPlants = async () => {
         //TODO: Needs error handling if fetch fails
+        const data = await fetch(`${process.env.REACT_APP_BASE_URL}/plants/search?q=${enteredPlant}`, {
+          headers: {
+            'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          }
+        })
+        return await data.json()
+      }
 
+      fetchPlants()
+      .then((data) => {
+        setPlantList(data)
+        setIsError(false)
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsError(true)
+      })
+    }, [enteredPlant]);
+
+  useEffect(() => {
+    const closeDropDownOnClickFn = (event: any) => {
+      if(dropDownOpen && !closeDropDownOnClick.current?.contains(event.target)) {
+        setDropDownOpen(false)
+      }
+    }
+    document.addEventListener("click", closeDropDownOnClickFn)
+  }, [closeDropDownOnClick, dropDownOpen]);
+
+    function openDropDown() {
+      setDropDownOpen(true)
+    }
+
+    function closeDropDown() {
+      setDropDownOpen(false)
+    }
+
+    function handlePlantItemClick(plant: Plant) {
+      submitPlant(plant);
+    }
+
+    function handlePlantItemKeyDown(event: KeyboardEvent<HTMLLIElement>, plant: Plant) {
+      if (event.key === 'Enter') {
         event.preventDefault();
+        submitPlant(plant);
+      }
+    }
 
-        if (!enteredPlant) {
-          setEnteredPlantError('Error, must enter a plant before submitting')
-          return;
-        }
-        setEnteredPlantError('')
-        await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/67bdca3d86bc1187fad97937`, {
+    async function submitPlant(plant: Plant) {
+      closeDropDown();
+      setEnteredPlant("")
+        //TODO: Needs error handling if fetch fails or if plant has already been added?
+        await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/${plant._id}`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
           },
@@ -24,14 +73,19 @@ export function EnterPlantInput() {
       }
 
     return (
-        <div>
+        <div ref={closeDropDownOnClick}>
             <form>
-                <label>
-                    Enter plant: <input type="text" aria-label="enter-plant" value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} />
-                </label>
-                <button type="submit" onClick={(event) => submitPlant(event)}>Submit</button>
+              <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
             </form>
-        {enteredPlantError && <p>{enteredPlantError}</p>}
+        {/* {enteredPlantError && <p>{enteredPlantError}</p>} */}
+        {isError && <p>Error fetching plants</p>}
+        {dropDownOpen &&
+        <ul className="dropdown" data-testid="plant-dropdown">
+          { plantList.map((plant) => {
+            return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
+          }) }
+        </ul>
+}
       </div>
     )
 }

@@ -30,7 +30,7 @@ export function Today() {
 
   function listPlants() {
     if (isError) {
-      return (<p>Error fetching plants</p>)
+      return (<p>Error fetching the plants you have eaten today</p>)
     }
 
     if (plants.length === 0) {
@@ -40,7 +40,7 @@ export function Today() {
     return (
       <ul>
         { plants.map((plant) => {
-          return <li key={plant.id}>{ plant.name }</li>
+          return <li key={plant._id}>{ plant.name }</li>
         }) }
       </ul>
       )
