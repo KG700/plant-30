@@ -27,8 +27,7 @@ export function EnterPlantInput() {
         <div>
             <form>
                 <label>
-                    Enter plant:
-                    <input type="text" aria-label="enter-plant" value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} />
+                    Enter plant: <input type="text" aria-label="enter-plant" value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} />
                 </label>
                 <button type="submit" onClick={(event) => submitPlant(event)}>Submit</button>
             </form>
