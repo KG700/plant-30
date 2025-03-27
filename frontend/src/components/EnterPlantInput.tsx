@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { Plant } from "../types";
 
 export function EnterPlantInput() {
@@ -49,6 +49,17 @@ export function EnterPlantInput() {
       setDropDownOpen(false)
     }
 
+    function handlePlantItemClick(plant: Plant) {
+      submitPlant(plant);
+    }
+
+    function handlePlantItemKeyDown(event: KeyboardEvent<HTMLLIElement>, plant: Plant) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitPlant(plant);
+      }
+    }
+
     async function submitPlant(plant: Plant) {
       closeDropDown();
       setEnteredPlant("")
@@ -71,7 +82,7 @@ export function EnterPlantInput() {
         {dropDownOpen &&
         <ul className="dropdown" data-testid="plant-dropdown">
           { plantList.map((plant) => {
-            return <li key={plant._id} className="dropdown-items"><a onClick={() => submitPlant(plant)}>{ plant.name }</a></li>
+            return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
           }) }
         </ul>
 }

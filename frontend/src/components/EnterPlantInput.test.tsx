@@ -95,4 +95,32 @@ describe('EnterPlantInput', () => {
           expect(screen.getByText('Error fetching plants')).toBeVisible();
         });
       });
+
+      it('submits a plant on pressing Enter or Space on a dropdown item', async () => {
+        render(<EnterPlantInput />);
+
+        // Open the dropdown
+        const inputField = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+
+        // Wait for the dropdown to appear
+        await waitFor(() => {
+          screen.getByText('apple');
+        });
+
+        const appleListItem = screen.getByText('apple');
+
+        // Focus the list item (important for keyboard events)
+        appleListItem.focus();
+
+        // Simulate pressing Enter
+        fireEvent.keyDown(appleListItem, { key: 'Enter', code: 'Enter' });
+
+        await waitFor(() => {
+          expect(global.fetch).toHaveBeenCalledWith(
+            `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/1`,
+            expect.any(Object)
+          );
+        });
+      });
 });
