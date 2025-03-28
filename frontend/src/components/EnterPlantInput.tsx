@@ -9,10 +9,11 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     const [plantList, setPlantList] = useState<Plant[]>([]);
     const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
-    // const [enteredPlantError, setEnteredPlantError] = useState('')
+    const [enteredPlantMessage, setEnteredPlantMessage] = useState('')
     const [dropDownOpen, setDropDownOpen] = useState(false)
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
+    const messageRef = useRef<HTMLParagraphElement>(null);
 
     const searchPlants = async () => {
       try {
@@ -41,7 +42,24 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       }
     }
     document.addEventListener("click", closeDropDownOnClickFn)
+
+    return () => {
+      document.removeEventListener('click', closeDropDownOnClickFn);
+    };
   }, [closeDropDownOnClick, dropDownOpen]);
+
+  useEffect(() => {
+    const closeMessageOnClickFn = (event: any) => {
+      if(enteredPlantMessage && !messageRef.current?.contains(event.target)) {
+        setEnteredPlantMessage('');
+      }
+    }
+    document.addEventListener("click", closeMessageOnClickFn)
+
+    return () => {
+      document.removeEventListener('click', closeMessageOnClickFn);
+    };
+  }, [messageRef, enteredPlantMessage]);
 
     function openDropDown() {
       setDropDownOpen(true)
@@ -73,22 +91,23 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
           method: 'POST'
         })
         onPlantAdded();
+        setEnteredPlantMessage(`Added ${plant.name} to your plants`)
       }
 
     return (
-        <div ref={closeDropDownOnClick}>
-            <form>
-              <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
-            </form>
-        {/* {enteredPlantError && <p>{enteredPlantError}</p>} */}
+      <div ref={closeDropDownOnClick}>
+        <form>
+          <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
+        </form>
         {isError && <p>Error fetching plants</p>}
         {dropDownOpen &&
-        <ul className="dropdown" data-testid="plant-dropdown">
-          { plantList.map((plant) => {
-            return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
-          }) }
-        </ul>
-}
+          <ul className="dropdown" data-testid="plant-dropdown">
+            { plantList.map((plant) => {
+              return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
+            }) }
+          </ul>
+        }
+        {enteredPlantMessage && <p ref={messageRef}>{enteredPlantMessage}</p>}
       </div>
     )
 }

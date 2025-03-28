@@ -40,6 +40,10 @@ describe('EnterPlantInput', () => {
         })
         expect(screen.queryByTestId('plant-dropdown')).not.toBeInTheDocument();
         expect(inputField.value).toBe('');
+        expect(screen.getByText('Added apple to your plants')).toBeInTheDocument();
+
+        fireEvent.click(document.body);
+        expect(screen.queryByText('Added apple to your plants')).not.toBeInTheDocument();
       })
 
       it('updates enteredPlant state when input changes', () => {
