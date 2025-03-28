@@ -6,6 +6,7 @@ describe('EnterPlantInput', () => {
     beforeEach(() => {
         (global.fetch as jest.Mock) = jest.fn(() =>
           Promise.resolve({
+            ok: true,
             json: () => Promise.resolve([
               { _id: 1, name: 'apple' },
               { _id: 2, name: 'pear' },
@@ -16,8 +17,9 @@ describe('EnterPlantInput', () => {
 
     it('submits plant when entered', async () => {
         const userId = '67bc93477fcac69fbfe17d44';
+        const mockOnPlantAdded = jest.fn();
 
-        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
+        render(<EnterPlantInput onPlantAdded={mockOnPlantAdded}/>);
 
         const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
         fireEvent.click(inputField);
@@ -40,6 +42,7 @@ describe('EnterPlantInput', () => {
         })
         expect(screen.queryByTestId('plant-dropdown')).not.toBeInTheDocument();
         expect(inputField.value).toBe('');
+        expect(mockOnPlantAdded).toHaveBeenCalled();
         expect(screen.getByText('Added apple to your plants')).toBeInTheDocument();
 
         fireEvent.click(document.body);
@@ -51,6 +54,7 @@ describe('EnterPlantInput', () => {
         (global.fetch as jest.Mock)
           .mockReturnValueOnce(
             {
+              ok: true,
               json: () => Promise.resolve([
                 { _id: 1, name: 'apple' },
                 { _id: 2, name: 'pear' },
@@ -80,6 +84,43 @@ describe('EnterPlantInput', () => {
             }
           );
           expect(screen.getByText('Failed to add apple to your plants. Please try again.')).toBeVisible();
+        })
+      })
+
+      it('displays error message if user adds the same plant twice', async () => {
+        (global.fetch as jest.Mock)
+          .mockReturnValueOnce(
+            {
+              ok: true,
+              json: () => Promise.resolve([
+                { _id: 1, name: 'apple' },
+                { _id: 2, name: 'pear' },
+              ]),
+            }
+          )
+          .mockReturnValueOnce({ ok: true })
+          .mockReturnValueOnce({
+            ok: false,
+            json: () => Promise.resolve({ detail: "Plant already exists in user's collection" }),
+          });
+
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
+
+        const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+
+        await waitFor(() => {
+          const appleListItem = screen.getByText('apple');
+          fireEvent.click(appleListItem);
+        })
+        fireEvent.click(inputField);
+        waitFor(() => {
+          const appleListItem = screen.getByText('apple');
+          fireEvent.click(appleListItem);
+        })
+
+        await waitFor(() => {
+          expect(screen.getByText('You already have apple in your plants')).toBeVisible();
         })
       })
 

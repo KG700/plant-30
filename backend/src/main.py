@@ -67,11 +67,17 @@ async def add_plant(user_id: str, plant_id: str):
     todays_date = date.today().strftime("%d-%m-%Y")
     plant_key = "plants.%s" % todays_date
 
-    await app.mongodb["users"].update_one(
+    result = await app.mongodb["users"].update_one(
         {"_id": ObjectId(user_id)},
         {"$addToSet": {plant_key: plant_to_add}},
         upsert=True,
     )
+
+    if result.raw_result["nModified"] == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Plant already exists in user's collection",
+        )
 
     return plant_to_add
 
