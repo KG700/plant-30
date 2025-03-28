@@ -89,3 +89,34 @@ async def test_add_plant_duplicate(client, mock_mongo):
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Plant already exists in user's collection"}
+
+
+async def test_get_plants_today(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    todays_date = date.today().strftime("%d-%m-%Y")
+    plant_data = {
+        "_id": ObjectId(user_id),
+        "plants": {
+            todays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    response = client.get(f"/user/{user_id}/plants")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"id": "plant1", "name": "apple"},
+        {"id": "plant2", "name": "pear"},
+    ]
+
+
+async def test_get_plants_empty(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_data = {"_id": ObjectId(user_id), "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    response = client.get(f"/user/{user_id}/plants")
+
+    assert response.status_code == 200
+    assert response.json() == []
