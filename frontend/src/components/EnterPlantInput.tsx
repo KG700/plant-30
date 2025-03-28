@@ -14,26 +14,24 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-      const searchPlants = async () => {
-        //TODO: Needs error handling if fetch fails
+    const searchPlants = async () => {
+      try {
         const data = await fetch(`${process.env.REACT_APP_BASE_URL}/plants/search?q=${enteredPlant}`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
           }
         })
-        return await data.json()
-      }
-
-      searchPlants()
-      .then((data) => {
-        setPlantList(data)
+        const plantData = await data.json()
+        setPlantList(plantData)
         setIsError(false)
-      })
-      .catch((error) => {
+      } catch (error) {
         console.log(error);
         setIsError(true)
-      })
+      }
+    }
+
+    useEffect(() => {
+      searchPlants()
     }, [enteredPlant]);
 
   useEffect(() => {
