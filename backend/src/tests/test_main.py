@@ -65,3 +65,12 @@ async def test_add_plant(client, mock_mongo):
 
     assert response.status_code == 200
     assert response.json() == {"id": plant_id, "name": "apple", "category": "fruit"}
+
+
+async def test_add_plant_not_found(client):
+    user_id = "67bc93477fcac69fbfe17d44"
+    invalid_id = "000000000000000000000000"
+    response = client.post(f"/user/{user_id}/add-plant/{invalid_id}")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Plant not found"}

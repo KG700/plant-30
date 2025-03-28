@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
@@ -57,7 +57,10 @@ async def add_plant(user_id: str, plant_id: str):
         {"_id": ObjectId(plant_id)}, {"_id": 0}
     )
 
-    # TODO: what happens if plant_id doesn't exist?
+    if plant_to_add is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found"
+        )
 
     plant_to_add = dict(plant_to_add)
     plant_to_add["id"] = plant_id
