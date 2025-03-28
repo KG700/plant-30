@@ -6,6 +6,7 @@ from mongomock_motor import AsyncMongoMockClient
 
 from src.packages import mongodb
 from src.main import app
+from datetime import date
 
 
 @pytest.fixture
@@ -54,19 +55,17 @@ async def test_search_all_plants(client, mock_mongo):
     assert response.json() == []
 
 
-# async def test_add_plant(client, mock_mongo):
-#     user_id = "67bc93477fcac69fbfe17d44"
-#     plant_id = "67bdca3d86bc1187fad97937"
-#     plant_data = {"_id": ObjectId(plant_id), "name": "apple", "category": "fruit"}
+async def test_add_plant(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_id = "67bdca3d86bc1187fad97937"
+    plant_data = {"_id": ObjectId(plant_id), "name": "apple", "category": "fruit"}
 
-#     await mock_mongo.db["plants"].insert_one(plant_data)
+    await mock_mongo.db["plants"].insert_one(plant_data)
 
-#     # client.post(f"/user/{user_id}/add-plant/{plant_id}")
+    response = client.post(f"/user/{user_id}/add-plant/{plant_id}")
 
-#     response = client.post(f"/user/{user_id}/add-plant/{plant_id}")
-
-#     assert response.status_code == 200
-#     assert response.json() == {"id": plant_id, "name": "apple", "category": "fruit"}
+    assert response.status_code == 200
+    assert response.json() == {"id": plant_id, "name": "apple", "category": "fruit"}
 
 
 async def test_add_plant_not_found(client):
@@ -91,3 +90,34 @@ async def test_add_plant_duplicate(client, mock_mongo):
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Plant already exists in user's collection"}
+
+
+async def test_get_plants_today(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    todays_date = date.today().strftime("%d-%m-%Y")
+    plant_data = {
+        "_id": ObjectId(user_id),
+        "plants": {
+            todays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    response = client.get(f"/user/{user_id}/plants")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"id": "plant1", "name": "apple"},
+        {"id": "plant2", "name": "pear"},
+    ]
+
+
+async def test_get_plants_empty(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_data = {"_id": ObjectId(user_id), "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    response = client.get(f"/user/{user_id}/plants")
+
+    assert response.status_code == 200
+    assert response.json() == []

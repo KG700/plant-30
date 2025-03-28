@@ -62,24 +62,26 @@ async def add_plant(user_id: str, plant_id: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found"
         )
 
-    plant_to_add = dict(plant_to_add)
-    plant_to_add["id"] = plant_id
     todays_date = date.today().strftime("%d-%m-%Y")
-    plant_key = "plants.%s" % todays_date
+    plant_key = f"plants.{todays_date}.{plant_id}"
 
-    result = await app.mongodb["users"].update_one(
-        {"_id": ObjectId(user_id)},
-        {"$addToSet": {plant_key: plant_to_add}},
-        upsert=True,
+    is_plant_in_db = await app.mongodb["users"].find_one(
+        {"_id": ObjectId(user_id)}, {"_id": 0}
     )
 
-    if result.raw_result["nModified"] == 0:
+    if not is_plant_in_db is None and plant_id in is_plant_in_db["plants"][todays_date]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Plant already exists in user's collection",
         )
 
-    return plant_to_add
+    result = await app.mongodb["users"].update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {plant_key: plant_to_add}},
+        upsert=True,
+    )
+
+    return {"id": plant_id, **plant_to_add}
 
 
 @app.get("/user/{user_id}/plants")
@@ -94,6 +96,9 @@ async def get_plants(user_id: str, when: str = "today"):
     )
 
     if todays_date in list_of_plants["plants"]:
-        return list_of_plants["plants"][todays_date]
+        plants_list = []
+        for key, value in list_of_plants["plants"][todays_date].items():
+            plants_list.append({"id": key, **value})
+        return plants_list
     else:
         return []
