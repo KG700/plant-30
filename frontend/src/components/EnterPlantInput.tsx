@@ -9,7 +9,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     const [plantList, setPlantList] = useState<Plant[]>([]);
     const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
-    // const [enteredPlantError, setEnteredPlantError] = useState('')
+    const [enteredPlantMessage, setEnteredPlantMessage] = useState('')
     const [dropDownOpen, setDropDownOpen] = useState(false)
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
@@ -43,7 +43,15 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     document.addEventListener("click", closeDropDownOnClickFn)
   }, [closeDropDownOnClick, dropDownOpen]);
 
+  function handleClick(event: React.MouseEvent<HTMLDivElement>) {
+    if (event.target === event.currentTarget) {
+      event.preventDefault();
+      setEnteredPlantMessage("")
+    }
+  }
+
     function openDropDown() {
+      setEnteredPlantMessage("")
       setDropDownOpen(true)
     }
 
@@ -73,22 +81,23 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
           method: 'POST'
         })
         onPlantAdded();
+        setEnteredPlantMessage(`Added ${plant.name} to your plants`)
       }
 
     return (
-        <div ref={closeDropDownOnClick}>
-            <form>
-              <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
-            </form>
-        {/* {enteredPlantError && <p>{enteredPlantError}</p>} */}
+      <div ref={closeDropDownOnClick} onClick={handleClick}>
+        <form>
+          <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
+        </form>
         {isError && <p>Error fetching plants</p>}
         {dropDownOpen &&
-        <ul className="dropdown" data-testid="plant-dropdown">
-          { plantList.map((plant) => {
-            return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
-          }) }
-        </ul>
-}
+          <ul className="dropdown" data-testid="plant-dropdown">
+            { plantList.map((plant) => {
+              return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
+            }) }
+          </ul>
+        }
+        {enteredPlantMessage && <p>{enteredPlantMessage}</p>}
       </div>
     )
 }
