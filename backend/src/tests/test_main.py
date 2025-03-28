@@ -6,6 +6,7 @@ from mongomock_motor import AsyncMongoMockClient
 
 from src.packages import mongodb
 from src.main import app
+from datetime import date
 
 
 @pytest.fixture
