@@ -46,6 +46,43 @@ describe('EnterPlantInput', () => {
         expect(screen.queryByText('Added apple to your plants')).not.toBeInTheDocument();
       })
 
+      it('displays error message if plant submission fails', async () => {
+        const userId = '67bc93477fcac69fbfe17d44';
+        (global.fetch as jest.Mock)
+          .mockReturnValueOnce(
+            {
+              json: () => Promise.resolve([
+                { _id: 1, name: 'apple' },
+                { _id: 2, name: 'pear' },
+              ]),
+            }
+          )
+          .mockRejectedValueOnce('Failed to add apple to your plants. Please try again.');
+
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
+
+        const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
+        fireEvent.click(inputField);
+
+        waitFor(() => {
+          const appleListItem = screen.getByText('apple');
+          fireEvent.click(appleListItem);
+        })
+
+        await waitFor(() => {
+          expect(global.fetch).toHaveBeenCalledWith(
+            `${process.env.REACT_APP_BASE_URL}/user/${userId}/add-plant/1`,
+            {
+              headers: {
+                'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+              },
+              method: 'POST',
+            }
+          );
+          expect(screen.getByText('Failed to add apple to your plants. Please try again.')).toBeVisible();
+        })
+      })
+
       it('updates enteredPlant state when input changes', () => {
         render(<EnterPlantInput onPlantAdded={jest.fn}/>);
         const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');

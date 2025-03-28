@@ -26,7 +26,6 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
         setPlantList(plantData)
         setIsError(false)
       } catch (error) {
-        console.log(error);
         setIsError(true)
       }
     }
@@ -83,16 +82,19 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     async function submitPlant(plant: Plant) {
       closeDropDown();
       setEnteredPlant("")
-        //TODO: Needs error handling if fetch fails or if plant has already been added?
+      try {
         await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/${plant._id}`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
           },
           method: 'POST'
         })
-        onPlantAdded();
-        setEnteredPlantMessage(`Added ${plant.name} to your plants`)
+          onPlantAdded();
+          setEnteredPlantMessage(`Added ${plant.name} to your plants`)
+      } catch (error) {
+        setEnteredPlantMessage(`Failed to add ${plant.name} to your plants. Please try again.`);
       }
+    }
 
     return (
       <div ref={closeDropDownOnClick}>
