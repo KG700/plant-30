@@ -9,23 +9,23 @@ export function Today() {
 
     // TODO: need to get the userId somehow - probably taken from the url and saved into the state.
 
-  useEffect(() => {
     const fetchPlants = async () => {
-      //TODO: Needs error handling if fetch fails
-      const data = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/plants?when=today`, {
-        headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
-        }
-      })
-      return await data.json()
+      try {
+        const data = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/plants?when=today`, {
+          headers: {
+            'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          }
+        })
+        const plantsData = await data.json()
+        setPlants(plantsData)
+        setIsError(false)
+      } catch (error) {
+        setIsError(true)
+      }
     }
 
+  useEffect(() => {
     fetchPlants()
-      .then((data) => {
-        setPlants(data)
-        setIsError(false)
-      })
-      .catch(() => setIsError(true))
   }, []);
 
   function listPlants() {
@@ -50,7 +50,7 @@ export function Today() {
     <div className="App" data-testid="today-view">
       <header className="App-header">
         <h2>Number of plants eaten today: {plants.length}</h2>
-        <EnterPlantInput />
+        <EnterPlantInput onPlantAdded={fetchPlants}/>
         <h2>Plants eaten today:</h2>
         { listPlants() }
       </header>

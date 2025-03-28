@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { Plant } from "../types";
 
-export function EnterPlantInput() {
+type PlantInputProps = {
+  onPlantAdded: () => void;
+};
+
+export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     const [plantList, setPlantList] = useState<Plant[]>([]);
     const [isError, setIsError] = useState(false);
     const [enteredPlant, setEnteredPlant] = useState('');
@@ -10,26 +14,24 @@ export function EnterPlantInput() {
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-      const fetchPlants = async () => {
-        //TODO: Needs error handling if fetch fails
+    const searchPlants = async () => {
+      try {
         const data = await fetch(`${process.env.REACT_APP_BASE_URL}/plants/search?q=${enteredPlant}`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
           }
         })
-        return await data.json()
-      }
-
-      fetchPlants()
-      .then((data) => {
-        setPlantList(data)
+        const plantData = await data.json()
+        setPlantList(plantData)
         setIsError(false)
-      })
-      .catch((error) => {
+      } catch (error) {
         console.log(error);
         setIsError(true)
-      })
+      }
+    }
+
+    useEffect(() => {
+      searchPlants()
     }, [enteredPlant]);
 
   useEffect(() => {
@@ -70,6 +72,7 @@ export function EnterPlantInput() {
           },
           method: 'POST'
         })
+        onPlantAdded();
       }
 
     return (

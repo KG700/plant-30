@@ -17,7 +17,7 @@ describe('EnterPlantInput', () => {
     it('submits plant when entered', async () => {
         const userId = '67bc93477fcac69fbfe17d44';
 
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
 
         const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
         fireEvent.click(inputField);
@@ -43,14 +43,14 @@ describe('EnterPlantInput', () => {
       })
 
       it('updates enteredPlant state when input changes', () => {
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
         const inputField: HTMLInputElement = screen.getByLabelText('enter-plant');
         fireEvent.change(inputField, { target: { value: 'app' } });
         expect(inputField.value).toBe('app');
       });
 
       it('opens the dropdown when input is clicked', async () => {
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
         const inputField = screen.getByLabelText('enter-plant');
         fireEvent.click(inputField);
         await waitFor(() => {
@@ -59,7 +59,7 @@ describe('EnterPlantInput', () => {
       });
 
       it('closes the dropdown when clicking outside', async () => {
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
         const inputField = screen.getByLabelText('enter-plant');
         fireEvent.click(inputField);
         await waitFor(() => {
@@ -70,7 +70,7 @@ describe('EnterPlantInput', () => {
       });
 
       it('fetches plants when input changes', async () => {
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
 
         const inputField = screen.getByLabelText('enter-plant');
         fireEvent.change(inputField, { target: { value: 'ap' } });
@@ -86,7 +86,7 @@ describe('EnterPlantInput', () => {
       it('displays error message if fetching plants fails', async () => {
         (global.fetch as jest.Mock) = jest.fn(() => Promise.reject('Fetch Error'));
 
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
 
         const inputField = screen.getByLabelText('enter-plant');
         fireEvent.click(inputField);
@@ -97,7 +97,7 @@ describe('EnterPlantInput', () => {
       });
 
       it('submits a plant on pressing Enter or Space on a dropdown item', async () => {
-        render(<EnterPlantInput />);
+        render(<EnterPlantInput onPlantAdded={jest.fn}/>);
 
         // Open the dropdown
         const inputField = screen.getByLabelText('enter-plant');
