@@ -13,6 +13,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     const [dropDownOpen, setDropDownOpen] = useState(false)
 
     const closeDropDownOnClick = useRef<HTMLInputElement>(null);
+    const messageRef = useRef<HTMLParagraphElement>(null);
 
     const searchPlants = async () => {
       try {
@@ -41,17 +42,26 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       }
     }
     document.addEventListener("click", closeDropDownOnClickFn)
+
+    return () => {
+      document.removeEventListener('click', closeDropDownOnClickFn);
+    };
   }, [closeDropDownOnClick, dropDownOpen]);
 
-  function handleClick(event: React.MouseEvent<HTMLDivElement>) {
-    if (event.target === event.currentTarget) {
-      event.preventDefault();
-      setEnteredPlantMessage("")
+  useEffect(() => {
+    const closeMessageOnClickFn = (event: any) => {
+      if(enteredPlantMessage && !messageRef.current?.contains(event.target)) {
+        setEnteredPlantMessage('');
+      }
     }
-  }
+    document.addEventListener("click", closeMessageOnClickFn)
+
+    return () => {
+      document.removeEventListener('click', closeMessageOnClickFn);
+    };
+  }, [messageRef, enteredPlantMessage]);
 
     function openDropDown() {
-      setEnteredPlantMessage("")
       setDropDownOpen(true)
     }
 
@@ -85,7 +95,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       }
 
     return (
-      <div ref={closeDropDownOnClick} onClick={handleClick}>
+      <div ref={closeDropDownOnClick}>
         <form>
           <input type="text" aria-label="enter-plant" placeholder='Search for plant' value={enteredPlant} onChange={(event) => setEnteredPlant(event.target.value)} onClick={openDropDown}/>
         </form>
@@ -97,7 +107,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
             }) }
           </ul>
         }
-        {enteredPlantMessage && <p>{enteredPlantMessage}</p>}
+        {enteredPlantMessage && <p ref={messageRef}>{enteredPlantMessage}</p>}
       </div>
     )
 }
