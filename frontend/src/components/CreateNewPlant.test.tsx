@@ -75,4 +75,34 @@ describe('CreateNewPlant', () => {
         expect(mockOnAdd).toHaveBeenCalledTimes(1);
         expect(mockOnAdd).toHaveBeenCalledWith({ '_id': 'id-for-beetroot-1234', name: 'beetroot', category: 'vegetable' });
     });
+
+    it('calls the create-plant endpoint with correct data when submit button clicked', async () => {
+        (global.fetch as jest.Mock).mockRejectedValueOnce('Error');
+
+        render(<CreateNewPlant enteredPlant="bee" onAdd={mockOnAdd}/>)
+
+        const inputField: HTMLInputElement = screen.getByLabelText("enter-new-plant");
+        const selectField: HTMLSelectElement = screen.getByTestId('category-dropdown');
+        const submitButton: HTMLButtonElement = screen.getByRole('button');
+
+        fireEvent.change(inputField, { target: { value: 'beetroot' }});
+        fireEvent.change(selectField, { target: { value: PlantCategories.vegetable } });
+        fireEvent.click(submitButton);
+
+        expect(fetch).toHaveBeenCalledTimes(1);
+        await waitFor(() => {
+            expect(fetch).toHaveBeenCalledWith(
+                `${process.env.REACT_APP_BASE_URL}/create-plant`,
+                {
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  method: 'POST',
+                  body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),
+                }
+              );
+            expect(screen.getByText('Failed to create the new plant, beetroot. Please try again')).toBeInTheDocument();
+        });
+        expect(mockOnAdd).not.toHaveBeenCalled();
+    });
 })

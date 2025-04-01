@@ -9,6 +9,7 @@ type CreatePlantInputProps = {
 export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
     const [plantName, setPlantName] = useState(enteredPlant)
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
 
     const handleSelect = (option: string) => {
@@ -16,6 +17,7 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
     };
 
     async function handleCreatePlant() {
+        setErrorMessage('');
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/create-plant`, {
                 headers: {
@@ -31,6 +33,7 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
             onAdd(plant)
         } catch (error) {
             console.log(error)
+            setErrorMessage(`Failed to create the new plant, ${plantName}. Please try again`)
         }
     }
 
@@ -50,6 +53,7 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
                 </select>
             </div>
             <button onClick={handleCreatePlant}>Create and add plant</button>
+            {errorMessage && <p>{errorMessage}</p>}
         </div>
     )
 
