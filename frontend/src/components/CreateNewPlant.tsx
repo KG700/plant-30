@@ -40,7 +40,7 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
                 <input aria-label="enter-new-plant" placeholder="Enter Plant" value={plantName} onChange={(event) => setPlantName(event.target.value)}/>
             </div>
             <div>
-                <select id="dropdown" value={selectedCategory} onChange={(e) => handleSelect(e.target.value)}>
+                <select id="dropdown" value={selectedCategory} onChange={(e) => handleSelect(e.target.value)} data-testid='category-dropdown'>
                     <option>Select plant category:</option>
                     {Object.keys(PlantCategories).map((option) => (
                         <option key={option} value={option}>
