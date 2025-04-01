@@ -23,6 +23,7 @@ ul {
   flex-direction: column;
   background-color: white;
   color: black;
+  padding: 1rem;
 }
 
 .dropdown-items {
