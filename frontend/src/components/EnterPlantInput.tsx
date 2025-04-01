@@ -117,7 +117,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       {isError && <p>Error fetching plants</p>}
       {dropDownOpen &&
         <ul className="dropdown" data-testid="plant-dropdown">
-          <li><a onClick={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</a></li>
+          <li><a onClick={() => setIsAddingPlant(!isAddingPlant)} onKeyDown={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</a></li>
           {isAddingPlant &&
             <CreateNewPlant enteredPlant={enteredPlant} onAdd={submitPlant}/>
           }
