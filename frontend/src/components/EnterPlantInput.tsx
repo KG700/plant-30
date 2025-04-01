@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { Plant } from "../types";
+import { CreateNewPlant } from "./CreateNewPlant";
 
 type PlantInputProps = {
   onPlantAdded: () => void;
@@ -11,6 +12,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
   const [enteredPlant, setEnteredPlant] = useState('');
   const [enteredPlantMessage, setEnteredPlantMessage] = useState('')
   const [dropDownOpen, setDropDownOpen] = useState(false)
+  const [isAddingPlant, setIsAddingPlant] = useState(false)
 
   const closeDropDownOnClick = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLParagraphElement>(null);
@@ -80,6 +82,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
   }
 
   async function submitPlant(plant: Plant) {
+    console.log(plant)
     closeDropDown();
     setEnteredPlant("")
     try {
@@ -114,6 +117,10 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       {isError && <p>Error fetching plants</p>}
       {dropDownOpen &&
         <ul className="dropdown" data-testid="plant-dropdown">
+          <li><a onClick={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</a></li>
+          {isAddingPlant &&
+            <CreateNewPlant enteredPlant={enteredPlant} onAdd={submitPlant}/>
+          }
           { plantList.map((plant) => {
             return <li key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</li>
           }) }

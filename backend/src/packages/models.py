@@ -13,6 +13,7 @@ from pydantic import (
 class PlantCategory(str, Enum):
     fruit = "fruit"
     vegetable = "vegetable"
+    seeds = "seeds"
     nuts = "nuts"
     grain = "grain"
     herb = "herb"
