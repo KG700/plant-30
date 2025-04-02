@@ -30,7 +30,7 @@ def client(mock_mongo, monkeypatch):
         yield client
 
 
-async def test_create_plant(client):
+async def test_create_plant_success(client):
     plant_data = {"name": "apple", "category": "fruit"}
     response = client.post("/create-plant", json=plant_data)
 
@@ -54,7 +54,52 @@ async def test_create_plant_already_exists(client, mock_mongo):
     assert response.json() == {"detail": "Plant already exists"}
 
 
-async def test_search_all_plants(client, mock_mongo):
+async def test_delete_plant_success(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_id = "67bdca3d86bc1187fad97937"
+    todays_date = date.today().strftime("%d-%m-%Y")
+
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": ObjectId(user_id),
+            "plants": {todays_date: {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    response = client.delete(f"/user/{user_id}/delete-plant/{plant_id}")
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Plant successfully deleted"}
+
+
+async def test_delete_plant_plant_not_found(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_id = "67bdca3d86bc1187fad97937"
+    todays_date = date.today().strftime("%d-%m-%Y")
+
+    await mock_mongo.db["users"].insert_one(
+        {"_id": ObjectId(user_id), "plants": {todays_date: {}}}
+    )
+
+    response = client.delete(f"/user/{user_id}/delete-plant/{plant_id}")
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Plant not found in user's collection for the specified date"
+    }
+
+
+async def test_delete_plant_user_not_found(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_id = "67bdca3d86bc1187fad97937"
+
+    response = client.delete(f"/user/{user_id}/delete-plant/{plant_id}")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "User not found"}
+
+
+async def test_search_all_plants_success(client, mock_mongo):
     plant_data = {"name": "apple", "category": "fruit"}
     await mock_mongo.db["plants"].insert_one(plant_data)
 
@@ -69,7 +114,7 @@ async def test_search_all_plants(client, mock_mongo):
     assert response.json() == []
 
 
-async def test_add_plant(client, mock_mongo):
+async def test_add_plant_success(client, mock_mongo):
     user_id = "67bc93477fcac69fbfe17d44"
     plant_id = "67bdca3d86bc1187fad97937"
     plant_data = {"_id": ObjectId(plant_id), "name": "apple", "category": "fruit"}
@@ -124,7 +169,7 @@ async def test_add_plant_duplicate(client, mock_mongo):
     assert response.json() == {"detail": "Plant already exists in user's collection"}
 
 
-async def test_get_plants_today(client, mock_mongo):
+async def test_get_plants_today_success(client, mock_mongo):
     user_id = "67bc93477fcac69fbfe17d44"
     todays_date = date.today().strftime("%d-%m-%Y")
     plant_data = {
