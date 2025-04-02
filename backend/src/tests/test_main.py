@@ -184,8 +184,8 @@ async def test_get_plants_today_success(client, mock_mongo):
 
     assert response.status_code == 200
     assert response.json() == [
-        {"id": "plant1", "name": "apple"},
-        {"id": "plant2", "name": "pear"},
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
     ]
 
 
