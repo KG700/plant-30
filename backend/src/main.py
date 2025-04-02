@@ -39,6 +39,30 @@ async def create_plant(plant: Plant):
     return Plant(**created_plant)
 
 
+@app.delete("/user/{user_id}/delete-plant/{plant_id}")
+async def delete_plant(user_id: str, plant_id: str, when: str = "today"):
+    todays_date = date.today().strftime("%d-%m-%Y")
+
+    if when == "today":
+        plant_key = f"plants.{todays_date}.{plant_id}"
+
+    result = await app.mongodb["users"].update_one(
+        {"_id": ObjectId(user_id)}, {"$unset": {plant_key: ""}}
+    )
+
+    if result.modified_count == 1:
+        return {"message": "Plant successfully deleted"}
+    elif result.matched_count == 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Plant not found in user's collection for the specified date",
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+
 @app.get("/plants/search")
 async def search_all_plants(q: str):
     plants = (
