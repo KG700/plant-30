@@ -22,6 +22,15 @@ app.add_middleware(
 
 @app.post("/create-plant", response_model=Plant, status_code=201)
 async def create_plant(plant: Plant):
+    is_plant_in_db = await app.mongodb["plants"].count_documents(
+        {"name": {"$regex": plant.name, "$options": "i"}}
+    )
+
+    if is_plant_in_db > 0:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Plant already exists"
+        )
+
     new_plant = await app.mongodb["plants"].insert_one(
         plant.model_dump(by_alias=True, exclude=["id"])
     )

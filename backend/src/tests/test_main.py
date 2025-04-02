@@ -40,6 +40,20 @@ async def test_create_plant(client):
     assert response.json() == {"_id": id, "name": "apple", "category": "fruit"}
 
 
+async def test_create_plant_already_exists(client, mock_mongo):
+    plant_data = {
+        "_id": "64e10a1b9d708654778a1337",
+        "name": "apple",
+        "category": "fruit",
+    }
+    await mock_mongo.db["plants"].insert_one(plant_data)
+
+    response = client.post("/create-plant", json={"name": "apple", "category": "fruit"})
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "Plant already exists"}
+
+
 async def test_search_all_plants(client, mock_mongo):
     plant_data = {"name": "apple", "category": "fruit"}
     await mock_mongo.db["plants"].insert_one(plant_data)
