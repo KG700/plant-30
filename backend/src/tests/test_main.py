@@ -6,7 +6,7 @@ from mongomock_motor import AsyncMongoMockClient
 
 from src.packages import mongodb
 from src.main import app
-from datetime import date
+from datetime import date, timedelta
 
 
 @pytest.fixture
@@ -75,6 +75,24 @@ async def test_add_plant(client, mock_mongo):
     plant_data = {"_id": ObjectId(plant_id), "name": "apple", "category": "fruit"}
 
     await mock_mongo.db["plants"].insert_one(plant_data)
+
+    response = client.post(f"/user/{user_id}/add-plant/{plant_id}")
+
+    assert response.status_code == 200
+    assert response.json() == {"id": plant_id, "name": "apple", "category": "fruit"}
+
+
+async def test_add_plant_first_plant_of_day(client, mock_mongo):
+    user_id = "67bc93477fcac69fbfe17d44"
+    plant_id = "67bdca3d86bc1187fad97937"
+    plant_data = {"_id": ObjectId(plant_id), "name": "apple", "category": "fruit"}
+    yesterday_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    user_plant_data = {
+        "_id": ObjectId(user_id),
+        "plants": {yesterday_date: {plant_id: {"name": "apple", "category": "fruit"}}},
+    }
+    await mock_mongo.db["plants"].insert_one(plant_data)
+    await mock_mongo.db["users"].insert_one(user_plant_data)
 
     response = client.post(f"/user/{user_id}/add-plant/{plant_id}")
 
