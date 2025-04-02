@@ -29,11 +29,20 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
                     category: selectedCategory
                 })
             })
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to create plant');
+            }
+
             const plant = await response.json() as unknown as Plant
             onAdd(plant)
-        } catch (error) {
-            console.log(error)
-            setErrorMessage(`Failed to create the new plant, ${plantName}. Please try again`)
+        } catch (error: any) {
+            if (error.message == "Plant already exists") {
+                setErrorMessage(`${plantName} already exists`);
+            } else {
+                setErrorMessage(`Failed to create the new plant, ${plantName}. Please try again`)
+            }
         }
     }
 
