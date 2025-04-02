@@ -135,7 +135,7 @@ async def get_plants(user_id: str, when: str = "today"):
     if todays_date in list_of_plants["plants"]:
         plants_list = []
         for key, value in list_of_plants["plants"][todays_date].items():
-            plants_list.append({"id": key, **value})
+            plants_list.append({"_id": key, **value})
         return plants_list
     else:
         return []

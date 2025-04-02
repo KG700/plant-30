@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Today } from './Today';
 
 describe('Today', () => {
@@ -16,37 +16,57 @@ describe('Today', () => {
       })
 
     it('fetches and renders plants', async () => {
-        render(<Today />);
+      render(<Today />);
 
-        await waitFor(() => {
-          expect(screen.getByText('rice')).toBeInTheDocument();
-          expect(screen.getByText('onion')).toBeInTheDocument();
-          expect(screen.getByText('Number of plants eaten today: 2')).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        expect(screen.getByText('rice')).toBeInTheDocument();
+        expect(screen.getByText('onion')).toBeInTheDocument();
+        expect(screen.getByText('Number of plants eaten today: 2')).toBeInTheDocument();
       });
+    });
 
-      it('shows no plants added message if no plants are fetched', async () => {
-        (global.fetch as jest.Mock) = jest.fn(() =>
-          Promise.resolve({
-            json: () => Promise.resolve([]),
-          })
-        );
+    it('calls delete endpoint when plant delete button pressed', async () => {
+      render(<Today />);
 
-        render(<Today />);
-
-        await waitFor(() => {
-          expect(screen.getByText('Number of plants eaten today: 0')).toBeInTheDocument();
-          expect(screen.getByText('You have not added any plants for today yet')).toBeInTheDocument();
-        });
-      });
-
-      it('throws error if plants fail to fetch', async () => {
-        (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
-
-        render(<Today />);
-
-        await waitFor(() => {
-          expect(screen.getByText('Error fetching the plants you have eaten today')).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        const onionItem: HTMLLIElement = screen.getByText("onion").closest("li") || new HTMLLIElement;
+        const deleteOnionButton = within(onionItem).getByRole('button');
+        fireEvent.click(deleteOnionButton);
       })
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/2?when=today`,
+            {
+              headers: {
+                'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+              },
+              method: 'DELETE',
+            }
+      )
+    });
+
+    it('shows no plants added message if no plants are fetched', async () => {
+      (global.fetch as jest.Mock) = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve([]),
+        })
+      );
+
+      render(<Today />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Number of plants eaten today: 0')).toBeInTheDocument();
+        expect(screen.getByText('You have not added any plants for today yet')).toBeInTheDocument();
+      });
+    });
+
+    it('throws error if plants fail to fetch', async () => {
+      (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
+
+      render(<Today />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Error fetching the plants you have eaten today')).toBeInTheDocument();
+      });
+    })
 })
