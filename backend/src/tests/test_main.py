@@ -34,10 +34,10 @@ async def test_create_plant_success(client):
     plant_data = {"name": "apple", "category": "fruit"}
     response = client.post("/create-plant", json=plant_data)
 
-    id = response.json()["_id"]
+    plant_id = response.json()["_id"]
 
     assert response.status_code == 201
-    assert response.json() == {"_id": id, "name": "apple", "category": "fruit"}
+    assert response.json() == {"_id": plant_id, "name": "apple", "category": "fruit"}
 
 
 async def test_create_plant_already_exists(client, mock_mongo):
