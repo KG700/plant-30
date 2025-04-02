@@ -45,6 +45,50 @@ describe('Today', () => {
       )
     });
 
+    it('renders error message if plant fails to delete', async () => {
+      (global.fetch as jest.Mock)
+        .mockReturnValueOnce(
+          {
+            ok: true,
+            json: () => Promise.resolve([
+              { _id: 1, name: 'rice' },
+              { _id: 2, name: 'onion' },
+            ]),
+          }
+        )
+        .mockReturnValueOnce(
+          {
+            ok: true,
+            json: () => Promise.resolve([
+              { _id: 1, name: 'rice' },
+              { _id: 2, name: 'onion' },
+            ]),
+          }
+        )
+        .mockRejectedValue('Failed to delete')
+
+      render(<Today />);
+
+      await waitFor(() => {
+        const onionItem: HTMLLIElement = screen.getByText("onion").closest("li") || new HTMLLIElement;
+        const deleteOnionButton = within(onionItem).getByRole('button');
+        fireEvent.click(deleteOnionButton);
+      })
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/2?when=today`,
+        {
+          headers: {
+            'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+          },
+          method: 'DELETE',
+        }
+      )
+      waitFor(() => {
+        expect(screen.getByText('Failed to delete plant from list')).toBeInTheDocument();
+      })
+    });
+
     it('shows no plants added message if no plants are fetched', async () => {
       (global.fetch as jest.Mock) = jest.fn(() =>
         Promise.resolve({

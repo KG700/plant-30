@@ -5,7 +5,8 @@ import '../App.css';
 
 export function Today() {
     const [plants, setPlants] = useState<Plant[]>([]);
-    const [isError, setIsError] = useState(false);
+    const [isFetchError, setIsFetchError] = useState(false);
+    const [isDeleteError, setIsDeleteError] = useState(false);
 
     // TODO: need to get the userId somehow - probably taken from the url and saved into the state.
 
@@ -18,9 +19,10 @@ export function Today() {
         })
         const plantsData = await data.json()
         setPlants(plantsData)
-        setIsError(false)
+        setIsFetchError(false)
+        setIsDeleteError(false)
       } catch (error) {
-        setIsError(true)
+        setIsFetchError(true)
       }
     }
 
@@ -29,7 +31,7 @@ export function Today() {
   }, []);
 
   function listPlants() {
-    if (isError) {
+    if (isFetchError) {
       return (<p>Error fetching the plants you have eaten today</p>)
     }
 
@@ -47,6 +49,7 @@ export function Today() {
   }
 
   async function handleDeletePlant(plant_id: string) {
+    setIsDeleteError(false)
     try {
       await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/${plant_id}?when=today`, {
         headers: {
@@ -54,10 +57,10 @@ export function Today() {
         },
         method: 'DELETE'
       })
+      fetchPlants()
     } catch (error) {
-      setIsError(true)
+      setIsDeleteError(true)
     }
-    fetchPlants()
   }
 
   return (
@@ -65,6 +68,7 @@ export function Today() {
       <header className="App-header">
         <h2>Number of plants eaten today: {plants.length}</h2>
         <EnterPlantInput onPlantAdded={fetchPlants}/>
+        { isDeleteError && <p>Failed to delete plant from list</p>}
         <h2>Plants eaten today:</h2>
         { listPlants() }
       </header>
