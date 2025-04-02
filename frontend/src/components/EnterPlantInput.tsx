@@ -74,7 +74,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     submitPlant(plant);
   }
 
-  function handlePlantItemKeyDown(event: KeyboardEvent<HTMLDivElement>, plant: Plant) {
+  function handlePlantItemKeyDown(event: KeyboardEvent<HTMLButtonElement>, plant: Plant) {
     if (event.key === 'Enter') {
       event.preventDefault();
       submitPlant(plant);
@@ -117,12 +117,12 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       {isError && <p>Error fetching plants</p>}
       {dropDownOpen &&
         <div className="dropdown" data-testid="plant-dropdown">
-          <div role="button" onClick={() => setIsAddingPlant(!isAddingPlant)} onKeyDown={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</div>
+          <button role="button" onClick={() => setIsAddingPlant(!isAddingPlant)} onKeyDown={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</button>
           {isAddingPlant &&
             <CreateNewPlant enteredPlant={enteredPlant} onAdd={submitPlant}/>
           }
           { plantList.map((plant) => {
-            return <div key={plant._id} className="dropdown-items" role="button" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</div>
+            return <button key={plant._id} className="dropdown-items" role="button" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</button>
           }) }
         </div>
       }
