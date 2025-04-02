@@ -117,12 +117,12 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
       {isError && <p>Error fetching plants</p>}
       {dropDownOpen &&
         <div className="dropdown" data-testid="plant-dropdown">
-          <button role="button" onClick={() => setIsAddingPlant(!isAddingPlant)} onKeyDown={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</button>
+          <button onClick={() => setIsAddingPlant(!isAddingPlant)} onKeyDown={() => setIsAddingPlant(!isAddingPlant)}>Create new plant</button>
           {isAddingPlant &&
             <CreateNewPlant enteredPlant={enteredPlant} onAdd={submitPlant}/>
           }
           { plantList.map((plant) => {
-            return <button key={plant._id} className="dropdown-items" role="button" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</button>
+            return <button key={plant._id} className="dropdown-items" onClick={() => handlePlantItemClick(plant) } onKeyDown={(event) => handlePlantItemKeyDown(event, plant)}>{ plant.name }</button>
           }) }
         </div>
       }
