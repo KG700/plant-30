@@ -78,13 +78,17 @@ async def add_plant(user_id: str, plant_id: str):
         {"_id": ObjectId(user_id)}, {"_id": 0}
     )
 
-    if not is_plant_in_db is None and plant_id in is_plant_in_db["plants"][todays_date]:
+    if (
+        (is_plant_in_db is not None)
+        and (todays_date in is_plant_in_db["plants"])
+        and (plant_id in is_plant_in_db["plants"][todays_date])
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Plant already exists in user's collection",
         )
 
-    result = await app.mongodb["users"].update_one(
+    await app.mongodb["users"].update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {plant_key: plant_to_add}},
         upsert=True,
