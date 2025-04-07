@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 ### Running server
 ```
-uvicorn main:app --reload --log-level debug
+uvicorn src.main:app --reload --log-level debug
 ```
 
 ### Deactivating virtual environment:

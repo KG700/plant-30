@@ -1,11 +1,14 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, Response, status, APIRouter
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
+from src.packages.config import get_settings
 from src.packages.config import logger
 from src.packages.mongodb import lifespan
-from src.packages.models import Plant
+from src.packages.models import AuthorizationResponse, Token, Plant
+from urllib.parse import urlencode
+from httpx import AsyncClient
 
 app = FastAPI(lifespan=lifespan)
 
@@ -18,6 +21,73 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+router = APIRouter()
+
+
+@app.get("/login")
+def get_login_url():
+    params = {
+        "client_id": get_settings().google_client_id,
+        "redirect_uri": get_settings().redirect_url,
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/userinfo.email",
+    }
+    return f"{get_settings().login_url}?{urlencode(params)}"
+
+
+@app.post("/authorise")
+async def verify_authorisation(body: AuthorizationResponse, response: Response):
+
+    params = {
+        "client_id": get_settings().google_client_id,
+        "client_secret": get_settings().google_client_secret,
+        "code": body.code,
+        "grant_type": "authorization_code",
+        "redirect_uri": get_settings().redirect_url,
+    }
+
+    async with AsyncClient() as client:
+        authenticate_user = await client.post(get_settings().token_url, params=params)
+
+        if authenticate_user.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to get access token",
+            )
+
+        access_token = authenticate_user.json().get("access_token")
+        user = await client.get(
+            f"{get_settings().user_url}?access_token={access_token}"
+        )
+        user_id = user.json().get("sub").encode("utf-8").hex()
+
+        user_session = {
+            "user_id": user_id,
+            "access_token": access_token,
+            "scope": authenticate_user.json().get("scope"),
+            "expires_in": datetime.now(timezone.utc)
+            + timedelta(seconds=authenticate_user.json().get("expires_in")),
+            "created_at": datetime.now(timezone.utc),
+            "id_token": authenticate_user.json().get("id_token"),
+        }
+        session = await app.mongodb["sessions"].insert_one(user_session)
+        session_id = str(session.inserted_id)
+
+        response.set_cookie(
+            key="session_id",
+            value=session_id,
+            httponly=True,
+            secure=True,
+            samesite="None",
+        )
+
+        user_plants = await app.mongodb["users"].find_one({"_id": user_id})
+        if user_plants is None:
+            user_plants = {"_id": user_id, "plants": {}}
+            await app.mongodb["users"].insert_one(user_plants)
+
+    return Token(access_token=access_token, session_id=session_id)
 
 
 @app.post("/create-plant", response_model=Plant, status_code=201)
@@ -85,7 +155,7 @@ async def search_all_plants(q: str):
 
 
 @app.post("/user/{user_id}/add-plant/{plant_id}")
-async def add_plant(user_id: str, plant_id: str):
+async def add_plant(user_id: str, plant_id: str, request: Request):
     plant_to_add = await app.mongodb["plants"].find_one(
         {"_id": ObjectId(plant_id)}, {"_id": 0}
     )
