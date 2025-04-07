@@ -5,9 +5,17 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
-    PlainSerializer,
-    root_validator,
 )
+
+
+class AuthorizationResponse(BaseModel):
+    state: str
+    code: str
+
+
+class Token(BaseModel):
+    access_token: str
+    session_id: str
 
 
 class PlantCategory(str, Enum):
