@@ -45,4 +45,36 @@ describe('Authenticate', () => {
             expect(mockNavigate).toBeCalledWith('/');
         })
     })
+
+    it('handles error when authorise fails', async () => {
+        (global.fetch as jest.Mock) = jest.fn(() =>
+          Promise.resolve({
+            ok: false,
+            status: 500,
+            json: () => Promise.resolve({ message: 'error' }),
+          })
+        );
+
+        render(
+            <MemoryRouter initialEntries={['/?code=test_code']}>
+                <Authenticate />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(global.fetch).toBeCalledWith(`${process.env.REACT_APP_BASE_URL}/authorise`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+                },
+                body: JSON.stringify({ code: 'test_code' })
+            });
+        })
+
+        await waitFor(() => {
+            expect(mockNavigate).toBeCalledTimes(1);
+            expect(mockNavigate).toBeCalledWith('/error');
+        })
+    })
 })

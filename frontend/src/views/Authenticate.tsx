@@ -23,6 +23,7 @@ export function Authenticate() {
                 if (!response.ok) {
                     setIsAuthenticated(false);
                     console.error('Error:', response.statusText);
+                    navigate('/error');
                     return;
                 }
                 setIsAuthenticated(true);
