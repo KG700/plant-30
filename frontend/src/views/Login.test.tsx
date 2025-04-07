@@ -28,7 +28,7 @@ describe('Login', () => {
         const loginButton = screen.getByRole('button', { name: /login/i });
         fireEvent.click(loginButton);
 
-        expect(global.fetch).toBeCalledWith(`${process.env.REACT_APP_BASE_URL}/login`, { "headers": {"Access-Control-Allow-Origin": "http://localhost:3000"} });
+        expect(global.fetch).toBeCalledWith(`${process.env.REACT_APP_BASE_URL}/login`, { "headers": {"Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? ''} });
         await waitFor(() => {
             expect(window.location.href).toBe('http://google_login_url');
         })
