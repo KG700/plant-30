@@ -21,6 +21,9 @@ def mock_mongo():
 def mock_get_settings(monkeypatch):
     # Mock the Settings class
     mock_settings = Settings(
+        username="your_username",
+        password="your_password",
+        mongodb_uri="mongodb://localhost:27017",
         google_client_id="your_client_id",
         google_client_secret="your_client_secret",
         login_url="https://the.login.url",
