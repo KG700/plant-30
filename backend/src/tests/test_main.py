@@ -4,14 +4,31 @@ import pytest
 
 from mongomock_motor import AsyncMongoMockClient
 
-from src.packages import mongodb
 from src.main import app
 from datetime import date, timedelta
+from src.packages.config import Settings
+from unittest.mock import AsyncMock
+from src.packages.models import AuthorizationResponse, Token
+import httpx
 
 
 @pytest.fixture
 def mock_mongo():
     return AsyncMongoMockClient()
+
+
+@pytest.fixture(autouse=True)
+def mock_get_settings(monkeypatch):
+    # Mock the Settings class
+    mock_settings = Settings(
+        google_client_id="your_client_id",
+        google_client_secret="your_client_secret",
+        login_url="https://the.login.url",
+        redirect_url="your_redirect_url",
+        token_url="https://the.token.url",
+        user_url="https://the.user.url",
+    )
+    monkeypatch.setattr("src.packages.config.Settings", lambda: mock_settings)
 
 
 @pytest.fixture
@@ -28,6 +45,53 @@ def client(mock_mongo, monkeypatch):
     app.mongodb = mock_mongo.get_database("db")
     with TestClient(app) as client:
         yield client
+
+
+async def test_get_login_url_success(client):
+    response = client.get("/login")
+
+    assert response.status_code == 200
+    assert (
+        response.json()
+        == "https://the.login.url?client_id=your_client_id&redirect_uri=your_redirect_url&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email"
+    )
+
+
+async def test_authorise_success(client, mock_mongo, monkeypatch):
+    async def mock_post(url, params):
+        return httpx.Response(
+            status_code=200,
+            json={
+                "access_token": "mocked_access_token",
+                "scope": "mocked_scope",
+                "expires_in": 3600,
+                "id_token": "mocked_id_token",
+            },
+        )
+
+    mock_user_response = httpx.Response(status_code=200, json={"sub": "mocked_user_id"})
+
+    mock_async_client = AsyncMock(spec=httpx.AsyncClient)
+    mock_async_client.post = AsyncMock(side_effect=mock_post)
+    mock_async_client.get = AsyncMock(return_value=mock_user_response)
+
+    mock_async_client.__aenter__.return_value = mock_async_client
+
+    monkeypatch.setattr("src.main.AsyncClient", lambda: mock_async_client)
+
+    body = AuthorizationResponse(code="mocked_auth_code")
+
+    response = client.post("/authorise", json=body.model_dump())
+
+    assert response.status_code == 200
+    assert response.json()["access_token"] == "mocked_access_token"
+    assert "session_id" in response.json()
+
+    session_count = await mock_mongo.db["sessions"].count_documents({})
+    assert session_count == 1
+
+    user_count = await mock_mongo.db["users"].count_documents({})
+    assert user_count == 1
 
 
 async def test_create_plant_success(client):

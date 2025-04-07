@@ -49,6 +49,7 @@ async def verify_authorisation(body: AuthorizationResponse, response: Response):
 
     async with AsyncClient() as client:
         authenticate_user = await client.post(get_settings().token_url, params=params)
+
         if authenticate_user.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -71,7 +72,7 @@ async def verify_authorisation(body: AuthorizationResponse, response: Response):
             "id_token": authenticate_user.json().get("id_token"),
         }
         session = await app.mongodb["sessions"].insert_one(user_session)
-        session_id = session.inserted_id
+        session_id = str(session.inserted_id)
 
         response.set_cookie(
             key="session_id",

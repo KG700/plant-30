@@ -9,7 +9,7 @@ from pydantic import (
 
 
 class AuthorizationResponse(BaseModel):
-    state: str
+    # state: str
     code: str
 
 
