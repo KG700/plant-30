@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor} from '@testing-library/react';
-import { location } from './__mocks__/window';
 import { Login } from './Login';
 
 describe('Login', () => {
@@ -10,6 +9,12 @@ describe('Login', () => {
             json: () => Promise.resolve("http://google_login_url"),
           })
         );
+
+        delete (window as any).location;
+        (window as any).location = {
+          href: '', // Initial value
+          assign: jest.fn(), // You can mock assign if needed
+        };
       })
 
     afterEach(() => {
@@ -24,8 +29,8 @@ describe('Login', () => {
         fireEvent.click(loginButton);
 
         expect(global.fetch).toBeCalledWith(`${process.env.REACT_APP_BASE_URL}/login`, { "headers": {"Access-Control-Allow-Origin": "http://localhost:3000"} });
-        waitFor(() => {
-            expect(location.href).toBe('http://google_login_url');
+        await waitFor(() => {
+            expect(window.location.href).toBe('http://google_login_url');
         })
     });
 })
