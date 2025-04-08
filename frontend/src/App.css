@@ -38,7 +38,7 @@
 }
 
 button {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New';
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', ui-serif;
   background-color: transparent;
   color: white;
   padding: 0.75rem;
