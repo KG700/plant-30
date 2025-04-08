@@ -28,8 +28,13 @@ security = HTTPBearer()
 
 
 async def get_current_user(credentials: str = Depends(security)):
-    scheme = credentials.scheme
-    if scheme != "Bearer":
+    if credentials.scheme != "Bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication scheme",
+        )
+
+    if credentials.credentials == "null" or credentials.credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication scheme",
