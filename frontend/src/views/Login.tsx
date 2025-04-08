@@ -12,8 +12,11 @@ export function Login() {
       }
 
     return (
-        <div>
-            <button onClick={handleLogin}>login</button>
+        <div className="App" data-testid="login-view">
+          <header className="App-header">
+            <h1>Login to Plant30</h1>
+            <button onClick={handleLogin}>login with Google</button>
+          </header>
         </div>
     )
 }
