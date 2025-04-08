@@ -37,7 +37,7 @@ async def get_current_user(credentials: str = Depends(security)):
     if credentials.credentials == "null" or credentials.credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication scheme",
+            detail="Invalid authentication credentials",
         )
 
     access_token, session_id = credentials.credentials.split(":")

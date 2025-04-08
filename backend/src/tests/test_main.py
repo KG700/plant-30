@@ -370,3 +370,83 @@ async def test_get_plants_empty(client, mock_mongo):
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+async def test_get_current_user_invalid_scheme(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock_user_id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {"_id": mock_user_id, "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    invalid_scheme = "bearer"
+
+    headers = {
+        "Authorization": f"{invalid_scheme} mocked_access_token:{mock_session_id}"
+    }
+    response = client.get("/user/plants", headers=headers)
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid authentication scheme"}
+
+
+async def test_get_current_user_missing_credentials(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock_user_id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {"_id": mock_user_id, "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    missing_credentials = "null"
+
+    headers = {"Authorization": f"Bearer {missing_credentials}"}
+    response = client.get("/user/plants", headers=headers)
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Invalid authentication credentials"}
+
+
+async def test_get_current_user_session_not_found(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock_user_id"
+
+    plant_data = {"_id": mock_user_id, "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/plants", headers=headers)
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Session not found"}
+
+
+async def test_get_current_user_session_expired(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock_user_id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) - timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {"_id": mock_user_id, "plants": {}}
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/plants", headers=headers)
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Session expired"}
