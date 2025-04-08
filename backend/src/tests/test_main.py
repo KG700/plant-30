@@ -25,6 +25,7 @@ def mock_get_settings(monkeypatch):
         password="your_password",
         mongodb_uri="mongodb://localhost:27017",
         google_client_id="your_client_id",
+        google_client_secret="your_client_secret",
         login_url="https://the.login.url",
         redirect_url="your_redirect_url",
         token_url="https://the.token.url",
