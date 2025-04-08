@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException, Request, Response, status, APIRouter
+from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId
 from datetime import date, datetime, timezone, timedelta
+
+from fastapi.security import HTTPBearer
 from src.packages.config import get_settings
 from src.packages.config import logger
 from src.packages.mongodb import lifespan
@@ -22,7 +24,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+security = HTTPBearer()
+
+
+async def get_current_user(credentials: str = Depends(security)):
+    if credentials.scheme != "Bearer":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication scheme",
+        )
+
+    if credentials.credentials == "null" or credentials.credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
+    access_token, session_id = credentials.credentials.split(":")
+    if not access_token or not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing credentials",
+        )
+
+    session = await app.mongodb["sessions"].find_one({"_id": ObjectId(session_id)})
+
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session not found",
+        )
+
+    if session["expires_in"].replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired",
+        )
+
+    return session["user_id"]
 
 
 @app.get("/login")
@@ -91,7 +130,7 @@ async def verify_authorisation(body: AuthorizationResponse, response: Response):
 
 
 @app.post("/create-plant", response_model=Plant, status_code=201)
-async def create_plant(plant: Plant):
+async def create_plant(plant: Plant, user_id: str = Depends(get_current_user)):
     is_plant_in_db = await app.mongodb["plants"].count_documents(
         {"name": {"$regex": plant.name, "$options": "i"}}
     )
@@ -109,15 +148,17 @@ async def create_plant(plant: Plant):
     return Plant(**created_plant)
 
 
-@app.delete("/user/{user_id}/delete-plant/{plant_id}")
-async def delete_plant(user_id: str, plant_id: str, when: str = "today"):
+@app.delete("/user/delete-plant/{plant_id}")
+async def delete_plant(
+    plant_id: str, when: str = "today", user_id: str = Depends(get_current_user)
+):
     todays_date = date.today().strftime("%d-%m-%Y")
 
     if when == "today":
         plant_key = f"plants.{todays_date}.{plant_id}"
 
     result = await app.mongodb["users"].update_one(
-        {"_id": ObjectId(user_id)}, {"$unset": {plant_key: ""}}
+        {"_id": user_id}, {"$unset": {plant_key: ""}}
     )
 
     if result.modified_count == 1:
@@ -154,8 +195,8 @@ async def search_all_plants(q: str):
     return jsonable_encoder(plants)
 
 
-@app.post("/user/{user_id}/add-plant/{plant_id}")
-async def add_plant(user_id: str, plant_id: str, request: Request):
+@app.post("/user/add-plant/{plant_id}")
+async def add_plant(plant_id: str, user_id: str = Depends(get_current_user)):
     plant_to_add = await app.mongodb["plants"].find_one(
         {"_id": ObjectId(plant_id)}, {"_id": 0}
     )
@@ -168,9 +209,7 @@ async def add_plant(user_id: str, plant_id: str, request: Request):
     todays_date = date.today().strftime("%d-%m-%Y")
     plant_key = f"plants.{todays_date}.{plant_id}"
 
-    is_plant_in_db = await app.mongodb["users"].find_one(
-        {"_id": ObjectId(user_id)}, {"_id": 0}
-    )
+    is_plant_in_db = await app.mongodb["users"].find_one({"_id": user_id}, {"_id": 0})
 
     if (
         (is_plant_in_db is not None)
@@ -183,7 +222,7 @@ async def add_plant(user_id: str, plant_id: str, request: Request):
         )
 
     await app.mongodb["users"].update_one(
-        {"_id": ObjectId(user_id)},
+        {"_id": user_id},
         {"$set": {plant_key: plant_to_add}},
         upsert=True,
     )
@@ -191,15 +230,15 @@ async def add_plant(user_id: str, plant_id: str, request: Request):
     return {"id": plant_id, **plant_to_add}
 
 
-@app.get("/user/{user_id}/plants")
-async def get_plants(user_id: str, when: str = "today"):
+@app.get("/user/plants")
+async def get_plants(when: str = "today", user_id: str = Depends(get_current_user)):
     todays_date = date.today().strftime("%d-%m-%Y")
 
     if when == "today":
         plant_key = "plants.%s" % todays_date
 
     list_of_plants = await app.mongodb["users"].find_one(
-        {"_id": ObjectId(user_id)}, {"_id": 0, plant_key: 1}
+        {"_id": user_id}, {"_id": 0, plant_key: 1}
     )
 
     if todays_date in list_of_plants["plants"]:

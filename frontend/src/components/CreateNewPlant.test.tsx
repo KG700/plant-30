@@ -1,12 +1,20 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useNavigate } from 'react-router';
 import { CreateNewPlant } from "./CreateNewPlant";
 import { PlantCategories } from "../types";
 
-describe('CreateNewPlant', () => {
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useNavigate: jest.fn(),
+}));
 
+describe('CreateNewPlant', () => {
+    let mockNavigate: jest.Mock;
     const mockOnAdd = jest.fn();
 
     beforeEach(() => {
+      mockNavigate = jest.fn();
+      (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
         (global.fetch as jest.Mock) = jest.fn(() =>
             Promise.resolve({
                 ok: true,
@@ -17,6 +25,15 @@ describe('CreateNewPlant', () => {
                 }),
             })
         )
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem: jest.fn(() => 'mocked-token'),
+            setItem: jest.fn(),
+            removeItem: jest.fn(),
+            clear: jest.fn(),
+          },
+          writable: true,
+        });
     })
 
     it('renders the create new plant input and dropdown', () => {
@@ -67,6 +84,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),
@@ -97,6 +115,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),
@@ -132,6 +151,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),

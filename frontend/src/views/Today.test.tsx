@@ -1,10 +1,19 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { useNavigate } from 'react-router';
 import { Today } from './Today';
 
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useNavigate: jest.fn(),
+}));
+
 describe('Today', () => {
+  let mockNavigate: jest.Mock;
 
     beforeEach(() => {
+      mockNavigate = jest.fn();
+      (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
         (global.fetch as jest.Mock) = jest.fn(() =>
           Promise.resolve({
             json: () => Promise.resolve([
@@ -13,6 +22,15 @@ describe('Today', () => {
             ]),
           })
         );
+        Object.defineProperty(window, 'localStorage', {
+            value: {
+              getItem: jest.fn(() => 'mocked-token'),
+              setItem: jest.fn(),
+              removeItem: jest.fn(),
+              clear: jest.fn(),
+            },
+            writable: true,
+        });
       })
 
     it('fetches and renders plants', async () => {
@@ -35,10 +53,11 @@ describe('Today', () => {
       })
 
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/2?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/delete-plant/2?when=today`,
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
               },
               method: 'DELETE',
             }
@@ -76,10 +95,11 @@ describe('Today', () => {
       })
 
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/2?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/delete-plant/2?when=today`,
         {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
           },
           method: 'DELETE',
         }

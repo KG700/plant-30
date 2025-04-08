@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { PlantCategories, Plant } from '../types';
 
 type CreatePlantInputProps = {
@@ -7,6 +8,7 @@ type CreatePlantInputProps = {
   };
 
 export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
+    const navigate = useNavigate();
     const [plantName, setPlantName] = useState(enteredPlant)
     const [selectedCategory, setSelectedCategory] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -17,11 +19,14 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
     };
 
     async function handleCreatePlant() {
+        const token = localStorage.getItem('token');
+        if (!token) navigate('/login')
         setErrorMessage('');
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/create-plant`, {
                 headers: {
-                    'Content-Type': "application/json"
+                    'Content-Type': "application/json",
+                    'Authorization': `Bearer ${token}`
                 },
                 method: 'POST',
                 body: JSON.stringify({
@@ -31,6 +36,8 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
             })
 
             if (!response.ok) {
+                if (response.status === 401) navigate('/login');
+
                 const errorData = await response.json();
                 throw new Error(errorData.detail || 'Failed to create plant');
             }

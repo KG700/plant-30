@@ -1,6 +1,5 @@
 import { Authenticate } from "./Authenticate";
 import { waitFor, render } from "@testing-library/react";
-import { ok } from "node:assert";
 import { MemoryRouter, useNavigate } from 'react-router';
 
 jest.mock('react-router', () => ({

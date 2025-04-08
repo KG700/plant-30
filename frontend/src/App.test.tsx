@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
@@ -15,12 +14,12 @@ describe('App', () => {
     );
   })
 
-  it('renders Today view', async () => {
+  it('renders Login view', async () => {
     render(<App />);
 
     await waitFor(() => {
-      const todayView = screen.getByTestId('today-view');
-      expect(todayView).toBeInTheDocument();
+      const loginView = screen.getByRole('button', { name: /login/i });
+      expect(loginView).toBeInTheDocument();
     });
   });
 

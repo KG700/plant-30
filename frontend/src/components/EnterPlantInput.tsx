@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
+import { useNavigate } from "react-router";
 import { Plant } from "../types";
 import { CreateNewPlant } from "./CreateNewPlant";
 
@@ -7,6 +8,7 @@ type PlantInputProps = {
 };
 
 export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
+  const navigate = useNavigate();
   const [plantList, setPlantList] = useState<Plant[]>([]);
   const [isError, setIsError] = useState(false);
   const [enteredPlant, setEnteredPlant] = useState('');
@@ -82,18 +84,23 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
   }
 
   async function submitPlant(plant: Plant) {
-    console.log(plant)
+    const token = localStorage.getItem('token');
+    if (!token) navigate('/login')
     closeDropDown();
     setEnteredPlant("")
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/${plant._id}`, {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/user/add-plant/${plant._id}`, {
         headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+          'Authorization': `Bearer ${token}`
         },
         method: 'POST'
       })
 
       if (!response.ok) {
+
+        if (response.status === 401) navigate('/login');
+
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to add plant');
       }
