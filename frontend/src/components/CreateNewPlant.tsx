@@ -21,7 +21,8 @@ export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/create-plant`, {
                 headers: {
-                    'Content-Type': "application/json"
+                    'Content-Type': "application/json",
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 method: 'POST',
                 body: JSON.stringify({

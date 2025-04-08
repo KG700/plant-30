@@ -13,6 +13,15 @@ describe('EnterPlantInput', () => {
             ]),
           })
         );
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem: jest.fn(() => 'mocked-token'),
+            setItem: jest.fn(),
+            removeItem: jest.fn(),
+            clear: jest.fn(),
+          },
+          writable: true,
+        });
       })
 
     it('submits plant when entered', async () => {
@@ -35,6 +44,7 @@ describe('EnterPlantInput', () => {
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
               },
               method: 'POST',
             }
@@ -79,6 +89,7 @@ describe('EnterPlantInput', () => {
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
               },
               method: 'POST',
             }

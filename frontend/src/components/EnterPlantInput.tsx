@@ -21,7 +21,8 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     try {
       const data = await fetch(`${process.env.REACT_APP_BASE_URL}/plants/search?q=${enteredPlant}`, {
         headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
       const plantData = await data.json()
@@ -82,13 +83,13 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
   }
 
   async function submitPlant(plant: Plant) {
-    console.log(plant)
     closeDropDown();
     setEnteredPlant("")
     try {
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/${plant._id}`, {
         headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         method: 'POST'
       })

@@ -26,6 +26,8 @@ export function Authenticate() {
                     navigate('/error');
                     return;
                 }
+                const { access_token, session_id } = await response.json();
+                localStorage.setItem('token', `${access_token}:${session_id}`);
                 setIsAuthenticated(true);
                 navigate('/');
             } catch(error) {

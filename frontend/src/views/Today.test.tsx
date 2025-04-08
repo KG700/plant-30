@@ -13,6 +13,15 @@ describe('Today', () => {
             ]),
           })
         );
+        Object.defineProperty(window, 'localStorage', {
+            value: {
+              getItem: jest.fn(() => 'mocked-token'),
+              setItem: jest.fn(),
+              removeItem: jest.fn(),
+              clear: jest.fn(),
+            },
+            writable: true,
+        });
       })
 
     it('fetches and renders plants', async () => {
@@ -39,6 +48,7 @@ describe('Today', () => {
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
               },
               method: 'DELETE',
             }
@@ -80,6 +90,7 @@ describe('Today', () => {
         {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+                'Authorization': 'Bearer mocked-token'
           },
           method: 'DELETE',
         }

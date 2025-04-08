@@ -17,6 +17,15 @@ describe('CreateNewPlant', () => {
                 }),
             })
         )
+        Object.defineProperty(window, 'localStorage', {
+          value: {
+            getItem: jest.fn(() => 'mocked-token'),
+            setItem: jest.fn(),
+            removeItem: jest.fn(),
+            clear: jest.fn(),
+          },
+          writable: true,
+        });
     })
 
     it('renders the create new plant input and dropdown', () => {
@@ -67,6 +76,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),
@@ -97,6 +107,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),
@@ -132,6 +143,7 @@ describe('CreateNewPlant', () => {
                 {
                   headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer mocked-token'
                   },
                   method: 'POST',
                   body: JSON.stringify({ name: 'beetroot', category: PlantCategories.vegetable }),

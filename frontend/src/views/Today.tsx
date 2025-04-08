@@ -14,8 +14,10 @@ export function Today() {
       try {
         const data = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/plants?when=today`, {
           headers: {
-            'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
-          }
+            'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          credentials: 'include'
         })
         const plantsData = await data.json()
         setPlants(plantsData)
@@ -53,7 +55,8 @@ export function Today() {
     try {
       await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/${plant_id}?when=today`, {
         headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
+          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         method: 'DELETE'
       })
