@@ -12,7 +12,7 @@ export function Today() {
 
     const fetchPlants = async () => {
       try {
-        const data = await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/plants?when=today`, {
+        const data = await fetch(`${process.env.REACT_APP_BASE_URL}/user/plants?when=today`, {
           headers: {
             'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -20,10 +20,11 @@ export function Today() {
           credentials: 'include'
         })
         const plantsData = await data.json()
-        setPlants(plantsData)
+        setPlants(plantsData ? plantsData : [])
         setIsFetchError(false)
         setIsDeleteError(false)
       } catch (error) {
+        console.log({ error })
         setIsFetchError(true)
       }
     }
@@ -53,7 +54,7 @@ export function Today() {
   async function handleDeletePlant(plant_id: string) {
     setIsDeleteError(false)
     try {
-      await fetch(`${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/delete-plant/${plant_id}?when=today`, {
+      await fetch(`${process.env.REACT_APP_BASE_URL}/user/delete-plant/${plant_id}?when=today`, {
         headers: {
           'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
