@@ -1,9 +1,18 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useNavigate } from 'react-router';
 import { EnterPlantInput } from "./EnterPlantInput";
 
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useNavigate: jest.fn(),
+}));
+
 describe('EnterPlantInput', () => {
+  let mockNavigate: jest.Mock;
 
     beforeEach(() => {
+      mockNavigate = jest.fn();
+      (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
         (global.fetch as jest.Mock) = jest.fn(() =>
           Promise.resolve({
             ok: true,
@@ -25,7 +34,6 @@ describe('EnterPlantInput', () => {
       })
 
     it('submits plant when entered', async () => {
-        const userId = '67bc93477fcac69fbfe17d44';
         const mockOnPlantAdded = jest.fn();
 
         render(<EnterPlantInput onPlantAdded={mockOnPlantAdded}/>);
@@ -40,7 +48,7 @@ describe('EnterPlantInput', () => {
 
         await waitFor(() => {
           expect(global.fetch).toHaveBeenCalledWith(
-            `${process.env.REACT_APP_BASE_URL}/user/${userId}/add-plant/1`,
+            `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
@@ -60,7 +68,6 @@ describe('EnterPlantInput', () => {
       })
 
       it('displays error message if plant submission fails', async () => {
-        const userId = '67bc93477fcac69fbfe17d44';
         (global.fetch as jest.Mock)
           .mockReturnValueOnce(
             {
@@ -85,7 +92,7 @@ describe('EnterPlantInput', () => {
 
         await waitFor(() => {
           expect(global.fetch).toHaveBeenCalledWith(
-            `${process.env.REACT_APP_BASE_URL}/user/${userId}/add-plant/1`,
+            `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
             {
               headers: {
                 'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
@@ -211,7 +218,7 @@ describe('EnterPlantInput', () => {
 
         await waitFor(() => {
           expect(global.fetch).toHaveBeenCalledWith(
-            `${process.env.REACT_APP_BASE_URL}/user/67bc93477fcac69fbfe17d44/add-plant/1`,
+            `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
             expect.any(Object)
           );
         });

@@ -1,12 +1,20 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useNavigate } from 'react-router';
 import { CreateNewPlant } from "./CreateNewPlant";
 import { PlantCategories } from "../types";
 
-describe('CreateNewPlant', () => {
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useNavigate: jest.fn(),
+}));
 
+describe('CreateNewPlant', () => {
+    let mockNavigate: jest.Mock;
     const mockOnAdd = jest.fn();
 
     beforeEach(() => {
+      mockNavigate = jest.fn();
+      (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
         (global.fetch as jest.Mock) = jest.fn(() =>
             Promise.resolve({
                 ok: true,

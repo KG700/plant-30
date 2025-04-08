@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
+import { useNavigate } from "react-router";
 import { Plant } from "../types";
 import { CreateNewPlant } from "./CreateNewPlant";
 
@@ -7,6 +8,7 @@ type PlantInputProps = {
 };
 
 export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
+  const navigate = useNavigate();
   const [plantList, setPlantList] = useState<Plant[]>([]);
   const [isError, setIsError] = useState(false);
   const [enteredPlant, setEnteredPlant] = useState('');
@@ -21,8 +23,7 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
     try {
       const data = await fetch(`${process.env.REACT_APP_BASE_URL}/plants/search?q=${enteredPlant}`, {
         headers: {
-          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? ''
         }
       })
       const plantData = await data.json()
@@ -83,18 +84,23 @@ export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
   }
 
   async function submitPlant(plant: Plant) {
+    const token = localStorage.getItem('token');
+    if (!token) navigate('/login')
     closeDropDown();
     setEnteredPlant("")
     try {
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/user/add-plant/${plant._id}`, {
         headers: {
           'Access-Control-Allow-Origin': process.env.REACT_APP_ORIGIN ?? '',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         method: 'POST'
       })
 
       if (!response.ok) {
+
+        if (response.status === 401) navigate('/login');
+
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Failed to add plant');
       }
