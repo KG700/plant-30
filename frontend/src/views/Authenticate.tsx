@@ -33,6 +33,7 @@ export function Authenticate() {
             } catch(error) {
                 setIsAuthenticated(false);
                 console.error('Error:', error);
+                navigate('/error')
             };
         }
     }
