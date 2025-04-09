@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Plant } from '../types';
 import { EnterPlantInput } from '../components/EnterPlantInput';
+import { LogoutButton } from '../components/LogoutButton';
 import '../App.css';
 
 export function Today() {
@@ -85,6 +86,7 @@ export function Today() {
   return (
     <div className="App" data-testid="today-view">
       <header className="App-header">
+        <LogoutButton />
         <h2>Number of plants eaten today: {plants.length}</h2>
         <EnterPlantInput onPlantAdded={fetchPlants}/>
         { isDeleteError && <p>Failed to delete plant from list</p>}
