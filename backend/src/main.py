@@ -255,6 +255,35 @@ async def get_plants(when: str = "today", user_id: str = Depends(get_current_use
         return []
 
 
+@app.get("/user/week-plants")
+async def get_weekly_plants(
+    when: str = "today", user_id: str = Depends(get_current_user)
+):
+
+    if when == "today":
+        first_date = datetime.now(timezone.utc)
+
+    week_dates = []
+    projection = {"_id": 0}
+    for i in range(7):
+        date = (first_date - timedelta(days=i)).strftime("%d-%m-%Y")
+        week_dates.append(date)
+        projection[f"plants.{date}"] = 1
+
+    list_of_plants = await app.mongodb["users"].find_one({"_id": user_id}, projection)
+
+    plants_list = []
+    plant_id_set = set()
+    for date in week_dates:
+        if date in list_of_plants["plants"]:
+            for plant_id, values in list_of_plants["plants"][date].items():
+                if plant_id not in plant_id_set:
+                    plants_list.append({"_id": plant_id, **values})
+                    plant_id_set.add(plant_id)
+
+    return plants_list
+
+
 @app.delete("/user/logout")
 async def logout(session_id: str = Depends(get_current_session)):
     result = await app.mongodb["sessions"].delete_one({"_id": ObjectId(session_id)})
