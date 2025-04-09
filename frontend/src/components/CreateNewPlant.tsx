@@ -7,7 +7,7 @@ type CreatePlantInputProps = {
     onAdd: (plant: Plant) => void;
   };
 
-export function CreateNewPlant({ enteredPlant, onAdd }: CreatePlantInputProps) {
+export function CreateNewPlant({ enteredPlant, onAdd }: Readonly<CreatePlantInputProps>) {
     const navigate = useNavigate();
     const [plantName, setPlantName] = useState(enteredPlant)
     const [selectedCategory, setSelectedCategory] = useState('');
