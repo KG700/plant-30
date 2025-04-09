@@ -450,3 +450,31 @@ async def test_get_current_user_session_expired(client, mock_mongo):
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Session expired"}
+
+
+async def test_logout_success(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock_user_id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) - timedelta(seconds=300),
+    }
+
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete("/user/logout", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "User successfully logged out"}
+
+
+async def test_logout_session_not_found(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete("/user/logout", headers=headers)
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Session not found"}

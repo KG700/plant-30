@@ -27,7 +27,7 @@ app.add_middleware(
 security = HTTPBearer()
 
 
-async def get_current_user(credentials: str = Depends(security)):
+def get_current_session(credentials: str = Depends(security)):
     if credentials.scheme != "Bearer":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,6 +46,11 @@ async def get_current_user(credentials: str = Depends(security)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing credentials",
         )
+
+    return session_id
+
+
+async def get_current_user(session_id: str = Depends(get_current_session)):
 
     session = await app.mongodb["sessions"].find_one({"_id": ObjectId(session_id)})
 
@@ -248,3 +253,15 @@ async def get_plants(when: str = "today", user_id: str = Depends(get_current_use
         return plants_list
     else:
         return []
+
+
+@app.delete("/user/logout")
+async def logout(session_id: str = Depends(get_current_session)):
+    result = await app.mongodb["sessions"].delete_one({"_id": ObjectId(session_id)})
+
+    if result.deleted_count == 1:
+        return {"message": "User successfully logged out"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Session not found"
+        )
