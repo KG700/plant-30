@@ -7,7 +7,7 @@ type PlantInputProps = {
   onPlantAdded: () => void;
 };
 
-export function EnterPlantInput({ onPlantAdded }: PlantInputProps) {
+export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
   const navigate = useNavigate();
   const [plantList, setPlantList] = useState<Plant[]>([]);
   const [isError, setIsError] = useState(false);
