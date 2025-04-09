@@ -12,8 +12,8 @@ describe('Login', () => {
 
         delete (window as any).location;
         (window as any).location = {
-          href: '', // Initial value
-          assign: jest.fn(), // You can mock assign if needed
+          href: '',
+          assign: jest.fn(),
         };
       })
 

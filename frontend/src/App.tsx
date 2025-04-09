@@ -6,7 +6,7 @@ import './App.css';
 
 function App() {
   return (
-      <BrowserRouter>
+    <BrowserRouter>
         <Routes>
           <Route path='/login' Component={Login} />
           <Route path='/oauth2/callback' Component={Authenticate} />

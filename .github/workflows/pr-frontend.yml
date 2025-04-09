@@ -1,5 +1,5 @@
 name: Frontend Pull Request
-run-name: ${{ github.actor }} is raising a Pull Request for the frontend 🚀
+run-name: ${{ github.actor }} is raising a Pull Request for the Frontend 🚀
 on:
   pull_request:
       paths:
