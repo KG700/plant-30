@@ -20,20 +20,16 @@ describe('Week', () => {
     })
 
     it('fetches and renders plants', async () => {
-        waitFor(() => {
-          render(<Week />);
-        })
+      render(<Week />);
 
-          screen.debug();
-
-          await waitFor(() => {
-            expect(screen.getByText('Grains')).toBeInTheDocument();
-            expect(screen.getByText('rice')).toBeInTheDocument();
-            expect(screen.getByText('Vegetables')).toBeInTheDocument();
-            expect(screen.getByText('onion')).toBeInTheDocument();
-            expect(screen.getByText('Nuts & Seeds')).not.toBeInTheDocument();
-            expect(screen.getByText('Number of plants eaten this week: 2')).toBeInTheDocument();
-          });
+      await waitFor(() => {
+        expect(screen.getByText('Grains')).toBeInTheDocument();
+        expect(screen.getByText('rice')).toBeInTheDocument();
+        expect(screen.getByText('Vegetables')).toBeInTheDocument();
+        expect(screen.getByText('onion')).toBeInTheDocument();
+        expect(screen.queryByText('Nuts & Seeds')).not.toBeInTheDocument();
+        expect(screen.getByText('Number of plants eaten this week: 2')).toBeInTheDocument();
+      });
     });
 
     it('shows no plants added message if no plants are fetched', async () => {
