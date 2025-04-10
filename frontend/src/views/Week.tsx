@@ -40,7 +40,6 @@ export function Week() {
         if (isFetchError) {
           return (<p>Error fetching the plants you have eaten this week</p>)
         }
-        console.log(plants)
 
         if (plants.length === 0) {
           return  (<p>You have not added any plants this week yet</p>)
