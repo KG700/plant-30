@@ -12,21 +12,24 @@ describe('Week', () => {
         (global.fetch as jest.Mock) = jest.fn(() =>
             Promise.resolve({
               json: () => Promise.resolve([
-                { _id: 1, name: 'rice' },
-                { _id: 2, name: 'onion' },
+                { _id: 1, name: 'rice', category: 'grain' },
+                { _id: 2, name: 'onion', category: 'vegetable' },
               ]),
             })
         );
     })
 
     it('fetches and renders plants', async () => {
-          render(<Week />);
+      render(<Week />);
 
-          await waitFor(() => {
-            expect(screen.getByText('rice')).toBeInTheDocument();
-            expect(screen.getByText('onion')).toBeInTheDocument();
-            expect(screen.getByText('Number of plants eaten this week: 2')).toBeInTheDocument();
-          });
+      await waitFor(() => {
+        expect(screen.getByText('Grains')).toBeInTheDocument();
+        expect(screen.getByText('rice')).toBeInTheDocument();
+        expect(screen.getByText('Vegetables')).toBeInTheDocument();
+        expect(screen.getByText('onion')).toBeInTheDocument();
+        expect(screen.queryByText('Nuts & Seeds')).not.toBeInTheDocument();
+        expect(screen.getByText('Number of plants eaten this week: 2')).toBeInTheDocument();
+      });
     });
 
     it('shows no plants added message if no plants are fetched', async () => {

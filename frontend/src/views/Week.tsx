@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Plant } from "../types";
+import { CategoryLabels, Plant, categoryLabelMap } from "../types";
 
 export function Week() {
+
     const navigate = useNavigate();
     const [plants, setPlants] = useState<Plant[]>([]);
     const [isFetchError, setIsFetchError] = useState(false);
@@ -35,6 +36,7 @@ export function Week() {
     }, [])
 
     function listPlants() {
+
         if (isFetchError) {
           return (<p>Error fetching the plants you have eaten this week</p>)
         }
@@ -43,13 +45,36 @@ export function Week() {
           return  (<p>You have not added any plants this week yet</p>)
         }
 
+        let orderedPlants: { [key: string]: Plant[] } = {};
+
+        plants.forEach((plant) => {
+          const categoryLabel = categoryLabelMap[plant.category];
+          if (!orderedPlants[categoryLabel]) {
+            orderedPlants[categoryLabel] = [];
+          }
+          orderedPlants[categoryLabel].push(plant);
+        });
+
         return (
-          <ul>
-            { plants.map((plant) => {
-              return <li key={plant._id}>{ plant.name }</li>
-            }) }
-          </ul>
-          )
+          <div>
+            { Object.values(CategoryLabels).map((label) => {
+              return (
+                <div key={label}>
+                  { label in orderedPlants &&
+                    <>
+                      <h3>{label}</h3>
+                      <ul>
+                        {orderedPlants[label].map((plant) => {
+                          return <li key={plant._id}>{plant.name}</li>
+                        })}
+                      </ul>
+                    </>
+                  }
+                </div>
+              )
+            })}
+          </div>
+        )
       }
 
     return (
