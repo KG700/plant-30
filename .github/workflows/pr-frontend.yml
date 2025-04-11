@@ -20,9 +20,9 @@ jobs:
       - name: Run unit tests
         working-directory: ./frontend
         run: npm test -- --coverage
-      - name: List files in the repository
-        run: |
-          cat ${{ github.workspace }}/frontend/coverage/lcov.info
+      - name: Check linting & formatting
+        working-directory: ./frontend
+        run: npm run lint
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
