@@ -20,6 +20,9 @@ jobs:
       - name: Run unit tests
         working-directory: ./frontend
         run: npm test -- --coverage
+      - name: Lint
+        working-directory: ./frontend
+        run: npm lint
       - name: List files in the repository
         run: |
           cat ${{ github.workspace }}/frontend/coverage/lcov.info
