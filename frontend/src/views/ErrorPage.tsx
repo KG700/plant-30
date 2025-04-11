@@ -10,7 +10,7 @@ export function ErrorPage() {
     return (
         <div className="App" data-testid="login-view">
           <header className="App-header">
-            <h1>There's been an issue logging you in</h1>
+            <h1>There has been an issue logging you in</h1>
             <p>Please try again</p>
             <button onClick={handleRedirect}>Go back to login page</button>
           </header>

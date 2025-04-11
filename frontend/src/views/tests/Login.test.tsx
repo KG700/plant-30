@@ -19,11 +19,13 @@ describe('Login', () => {
           })
         );
 
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         delete (window as any).location;
         (window as any).location = {
           href: '',
           assign: jest.fn(),
         };
+        /* eslint-enable @typescript-eslint/no-explicit-any */
       })
 
     afterEach(() => {

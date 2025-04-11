@@ -30,6 +30,7 @@ export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
       setPlantList(plantData)
       setIsError(false)
     } catch (error) {
+      console.log(error)
       setIsError(true)
     }
   }
@@ -39,8 +40,8 @@ export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
   }, [enteredPlant]);
 
   useEffect(() => {
-    const closeDropDownOnClickFn = (event: any) => {
-      if(dropDownOpen && !closeDropDownOnClick.current?.contains(event.target)) {
+    const closeDropDownOnClickFn = (event: MouseEvent) => {
+      if(dropDownOpen && !closeDropDownOnClick.current?.contains(event.target as Node)) {
         setDropDownOpen(false)
       }
     }
@@ -52,8 +53,8 @@ export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
   }, [closeDropDownOnClick, dropDownOpen]);
 
   useEffect(() => {
-    const closeMessageOnClickFn = (event: any) => {
-      if(enteredPlantMessage && !messageRef.current?.contains(event.target)) {
+    const closeMessageOnClickFn = (event: MouseEvent) => {
+      if(enteredPlantMessage && !messageRef.current?.contains(event.target as Node)) {
         setEnteredPlantMessage('');
       }
     }

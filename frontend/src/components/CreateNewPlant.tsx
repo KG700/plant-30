@@ -44,8 +44,9 @@ export function CreateNewPlant({ enteredPlant, onAdd }: Readonly<CreatePlantInpu
 
             const plant = await response.json() as unknown as Plant
             onAdd(plant)
-        } catch (error: any) {
-            if (error.message == "Plant already exists") {
+        } catch (error: unknown) {
+            console.log(error instanceof Error)
+            if (error instanceof Error && error.message == "Plant already exists") {
                 setErrorMessage(`${plantName} already exists`);
             } else {
                 setErrorMessage(`Failed to create the new plant, ${plantName}. Please try again`)

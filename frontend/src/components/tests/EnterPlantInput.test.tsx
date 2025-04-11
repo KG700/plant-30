@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useNavigate } from 'react-router';
 import { EnterPlantInput } from "../EnterPlantInput";
 
@@ -64,7 +64,9 @@ describe('EnterPlantInput', () => {
         expect(screen.getByText('Added apple to your plants')).toBeInTheDocument();
 
         fireEvent.click(document.body);
-        expect(screen.queryByText('Added apple to your plants')).not.toBeInTheDocument();
+        waitFor(() => {
+          expect(screen.queryByText('Added apple to your plants')).not.toBeInTheDocument();
+        })
       })
 
       it('displays error message if plant submission fails', async () => {

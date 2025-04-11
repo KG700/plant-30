@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useNavigate } from "react-router";
 import { LogoutButton } from "../LogoutButton";
 
@@ -9,7 +9,7 @@ jest.mock('react-router', () => ({
 
 describe('LogoutButton', () => {
   let mockNavigate: jest.Mock;
-  let mockRemoveItem: jest.Mock = jest.fn();
+  const mockRemoveItem: jest.Mock = jest.fn();
 
   beforeEach(() => {
     mockNavigate = jest.fn();

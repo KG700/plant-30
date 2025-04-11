@@ -45,7 +45,7 @@ export function Week() {
           return  (<p>You have not added any plants this week yet</p>)
         }
 
-        let orderedPlants: { [key: string]: Plant[] } = {};
+        const orderedPlants: { [key: string]: Plant[] } = {};
 
         plants.forEach((plant) => {
           const categoryLabel = categoryLabelMap[plant.category];
