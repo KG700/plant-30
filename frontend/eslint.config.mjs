@@ -18,4 +18,5 @@ export default defineConfig([
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"], ...pluginReact.configs.flat.recommended },
   { files: ["**/*.md"], plugins: { markdown }, language: "markdown/gfm", extends: ["markdown/recommended"] },
   { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
+  { rules: { "react/react-in-jsx-scope": "off", "react-in-jsx-scope": "off" }}
 ]);

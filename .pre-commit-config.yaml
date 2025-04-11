@@ -34,3 +34,9 @@ repos:
   hooks:
     - id: remove-tabs
     - id: remove-crlf
+- repo: local
+  hooks:
+    - id: eslint
+      name: Run ESLint
+      entry: cd frontend && npm run lint
+      language: system
