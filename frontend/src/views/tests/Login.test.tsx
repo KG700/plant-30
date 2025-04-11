@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor} from '@testing-library/react';
-import { Login } from './Login';
+import { Login } from '../Login';
 import { useNavigate } from 'react-router';
 
 jest.mock('react-router', () => ({

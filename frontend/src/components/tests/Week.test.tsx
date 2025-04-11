@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { Week } from "./Week";
+import { Week } from "../Week";
 
 jest.mock('react-router', () => ({
     ...jest.requireActual('react-router'),
@@ -28,7 +28,7 @@ describe('Week', () => {
         expect(screen.getByText('Vegetables')).toBeInTheDocument();
         expect(screen.getByText('onion')).toBeInTheDocument();
         expect(screen.queryByText('Nuts & Seeds')).not.toBeInTheDocument();
-        expect(screen.getByText('Number of plants eaten this week: 2')).toBeInTheDocument();
+        expect(screen.getByText('Total: 2')).toBeInTheDocument();
       });
     });
 
@@ -42,7 +42,7 @@ describe('Week', () => {
           render(<Week />);
 
           await waitFor(() => {
-            expect(screen.getByText('Number of plants eaten this week: 0')).toBeInTheDocument();
+            expect(screen.getByText('Total: 0')).toBeInTheDocument();
             expect(screen.getByText('You have not added any plants this week yet')).toBeInTheDocument();
           });
     });

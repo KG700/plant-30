@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useNavigate } from 'react-router';
-import { EnterPlantInput } from "./EnterPlantInput";
+import { EnterPlantInput } from "../EnterPlantInput";
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),
