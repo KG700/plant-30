@@ -23,7 +23,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +43,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@eslint/css": "^0.6.0",
+    "@eslint/js": "^9.24.0",
+    "@eslint/markdown": "^6.3.0",
+    "eslint": "^9.24.0",
+    "eslint-plugin-react": "^7.11.1",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.29.1"
   }
 }
