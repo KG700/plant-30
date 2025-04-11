@@ -24,7 +24,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -49,9 +50,14 @@
     "@eslint/js": "^9.24.0",
     "@eslint/markdown": "^6.3.0",
     "@types/react": "^19.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
     "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react": "^7.11.1",
     "globals": "^16.0.0",
+    "prettier": "^3.5.3",
     "typescript-eslint": "^8.29.1"
   }
 }
