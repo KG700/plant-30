@@ -78,12 +78,11 @@ export function Week() {
       }
 
     return (
-        <div className="App" data-testid="today-view">
-            <header className="App-header">
-                <h2>Number of plants eaten this week: {plants.length}</h2>
-                <h2>Plants eaten this week:</h2>
+        <div className="App" data-testid="week-view">
+            <main className="App-main">
+                <h2>Total: {plants.length}</h2>
                 { listPlants() }
-            </header>
+            </main>
         </div>
     )
 

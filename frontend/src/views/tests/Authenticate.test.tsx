@@ -1,4 +1,4 @@
-import { Authenticate } from "./Authenticate";
+import { Authenticate } from "../Authenticate";
 import { waitFor, render } from "@testing-library/react";
 import { MemoryRouter, useNavigate } from 'react-router';
 

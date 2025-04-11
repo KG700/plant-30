@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useNavigate } from "react-router";
-import { LogoutButton } from "./LogoutButton";
+import { LogoutButton } from "../LogoutButton";
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),

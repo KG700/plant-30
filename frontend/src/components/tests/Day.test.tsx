@@ -1,14 +1,14 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useNavigate } from 'react-router';
-import { Today } from './Today';
+import { Day } from '../Day';
 
 jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),
   useNavigate: jest.fn(),
 }));
 
-describe('Today', () => {
+describe('Day', () => {
   let mockNavigate: jest.Mock;
 
     beforeEach(() => {
@@ -34,17 +34,17 @@ describe('Today', () => {
       })
 
     it('fetches and renders plants', async () => {
-      render(<Today />);
+      render(<Day />);
 
       await waitFor(() => {
         expect(screen.getByText('rice')).toBeInTheDocument();
         expect(screen.getByText('onion')).toBeInTheDocument();
-        expect(screen.getByText('Number of plants eaten today: 2')).toBeInTheDocument();
+        expect(screen.getByText('Total: 2')).toBeInTheDocument();
       });
     });
 
     it('calls delete endpoint when plant delete button pressed', async () => {
-      render(<Today />);
+      render(<Day />);
 
       await waitFor(() => {
         const onionItem: HTMLLIElement = screen.getByText("onion").closest("li") || new HTMLLIElement;
@@ -86,7 +86,7 @@ describe('Today', () => {
         )
         .mockRejectedValue('Failed to delete')
 
-      render(<Today />);
+      render(<Day />);
 
       await waitFor(() => {
         const onionItem: HTMLLIElement = screen.getByText("onion").closest("li") || new HTMLLIElement;
@@ -116,10 +116,10 @@ describe('Today', () => {
         })
       );
 
-      render(<Today />);
+      render(<Day />);
 
       await waitFor(() => {
-        expect(screen.getByText('Number of plants eaten today: 0')).toBeInTheDocument();
+        expect(screen.getByText('Total: 0')).toBeInTheDocument();
         expect(screen.getByText('You have not added any plants for today yet')).toBeInTheDocument();
       });
     });
@@ -127,7 +127,7 @@ describe('Today', () => {
     it('throws error if plants fail to fetch', async () => {
       (global.fetch as jest.Mock).mockRejectedValue('Error fetching plants');
 
-      render(<Today />);
+      render(<Day />);
 
       await waitFor(() => {
         expect(screen.getByText('Error fetching the plants you have eaten today')).toBeInTheDocument();
