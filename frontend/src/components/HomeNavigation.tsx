@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function HomeNavigation({ setIsDayView }: { setIsDayView: (isDayView: boolean) => void }) {
+export function HomeNavigation({ setIsDayView }: Readonly<{ setIsDayView: (isDayView: boolean) => void }>) {
     const [isDayActive, setIsDayActive] = useState(true);
 
     useEffect(() => {
