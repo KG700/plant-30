@@ -29,7 +29,7 @@ export function Day() {
 
         setIsFetchError(false)
         setIsDeleteError(false)
-        setPlants(plantsData ? plantsData : [])
+        setPlants(plantsData ?? [])
       } catch (error) {
         console.log({ error })
         setIsFetchError(true)

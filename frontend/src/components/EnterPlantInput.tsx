@@ -102,7 +102,7 @@ export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
         if (response.status === 401) navigate('/login');
 
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to add plant');
+        throw new Error(errorData.detail ?? 'Failed to add plant');
       }
 
       setEnteredPlantMessage(`Added ${plant.name} to your plants`)

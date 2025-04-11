@@ -39,7 +39,7 @@ export function CreateNewPlant({ enteredPlant, onAdd }: Readonly<CreatePlantInpu
                 if (response.status === 401) navigate('/login');
 
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to create plant');
+                throw new Error(errorData.detail ?? 'Failed to create plant');
             }
 
             const plant = await response.json() as unknown as Plant
