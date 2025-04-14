@@ -69,6 +69,11 @@ async def get_current_user(session_id: str = Depends(get_current_session)):
     return session["user_id"]
 
 
+def validate_date(date_string):
+    logger.debug(date_string)
+    return date_string
+
+
 @app.get("/login")
 def get_login_url():
     params = {
@@ -242,10 +247,12 @@ async def get_daily_plants(
 
     if when == "today":
         the_date = date.today().strftime("%d-%m-%Y")
-        plant_key = "plants.%s" % the_date
     elif when == "yesterday":
         the_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
-        plant_key = "plants.%s" % the_date
+    else:
+        the_date = validate_date(when)
+
+    plant_key = f"plants.{the_date}"
 
     list_of_plants = await app.mongodb["users"].find_one(
         {"_id": user_id}, {"_id": 0, plant_key: 1}

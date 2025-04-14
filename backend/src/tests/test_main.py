@@ -414,6 +414,34 @@ async def test_get_daily_plants_yesterday_success(client, mock_mongo):
     ]
 
 
+async def test_get_daily_plants_date_success(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            "10-04-2025": {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/day-plants?when=10-04-2025", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
+    ]
+
+
 async def test_get_daily_plants_empty(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
