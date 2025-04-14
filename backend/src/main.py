@@ -230,7 +230,9 @@ async def search_all_plants(q: str):
 
 
 @app.post("/user/add-plant/{plant_id}")
-async def add_plant(plant_id: str, user_id: str = Depends(get_current_user)):
+async def add_plant(
+    plant_id: str, when: str = "today", user_id: str = Depends(get_current_user)
+):
     plant_to_add = await app.mongodb["plants"].find_one(
         {"_id": ObjectId(plant_id)}, {"_id": 0}
     )
@@ -240,15 +242,21 @@ async def add_plant(plant_id: str, user_id: str = Depends(get_current_user)):
             status_code=status.HTTP_404_NOT_FOUND, detail="Plant not found"
         )
 
-    todays_date = date.today().strftime("%d-%m-%Y")
-    plant_key = f"plants.{todays_date}.{plant_id}"
+    if when == "today":
+        the_date = date.today().strftime("%d-%m-%Y")
+    elif when == "yesterday":
+        the_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    else:
+        the_date = validate_date(when)
+
+    plant_key = f"plants.{the_date}.{plant_id}"
 
     is_plant_in_db = await app.mongodb["users"].find_one({"_id": user_id}, {"_id": 0})
 
     if (
         (is_plant_in_db is not None)
-        and (todays_date in is_plant_in_db["plants"])
-        and (plant_id in is_plant_in_db["plants"][todays_date])
+        and (the_date in is_plant_in_db["plants"])
+        and (plant_id in is_plant_in_db["plants"][the_date])
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
