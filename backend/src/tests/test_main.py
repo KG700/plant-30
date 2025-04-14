@@ -356,7 +356,7 @@ async def test_add_plant_duplicate(client, mock_mongo):
     assert response.json() == {"detail": "Plant already exists in user's collection"}
 
 
-async def test_get_plants_today_success(client, mock_mongo):
+async def test_get_daily_plants_today_success(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
     session_data = {
@@ -376,7 +376,7 @@ async def test_get_plants_today_success(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants?when=today", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == [
@@ -385,7 +385,127 @@ async def test_get_plants_today_success(client, mock_mongo):
     ]
 
 
-async def test_get_plants_empty(client, mock_mongo):
+async def test_get_daily_plants_yesterday_success(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    yesterdays_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            yesterdays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/day-plants?when=yesterday", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
+    ]
+
+
+async def test_get_daily_plants_date_success(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            "10-04-2025": {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/day-plants?when=10-04-2025", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
+    ]
+
+
+async def test_get_daily_plants_date_incorrect_format(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    incorrect_format_date = "2025-04-10"
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get(
+        f"/user/day-plants?when={incorrect_format_date}", headers=headers
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Invalid date: must be in the format dd-mm-yyyy"
+    }
+
+
+async def test_get_daily_plants_date_in_future(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    future_date = (date.today() + timedelta(days=1)).strftime("%d-%m-%Y")
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get(f"/user/day-plants?when={future_date}", headers=headers)
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid date: cannot be in the future"}
+
+
+async def test_get_daily_plants_date_invalid(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    invalid_date = "30-02-2025"
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get(f"/user/day-plants?when={invalid_date}", headers=headers)
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Invalid date: ValueError('day is out of range for month')"
+    }
+
+
+async def test_get_daily_plants_empty(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
     session_data = {
@@ -399,7 +519,7 @@ async def test_get_plants_empty(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == []
@@ -458,7 +578,7 @@ async def test_get_current_user_invalid_scheme(client, mock_mongo):
     headers = {
         "Authorization": f"{invalid_scheme} mocked_access_token:{mock_session_id}"
     }
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid authentication scheme"}
@@ -480,7 +600,7 @@ async def test_get_current_user_missing_credentials(client, mock_mongo):
     missing_credentials = "null"
 
     headers = {"Authorization": f"Bearer {missing_credentials}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid authentication credentials"}
@@ -494,7 +614,7 @@ async def test_get_current_user_session_not_found(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Session not found"}
@@ -514,7 +634,7 @@ async def test_get_current_user_session_expired(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Session expired"}

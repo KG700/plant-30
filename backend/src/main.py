@@ -11,6 +11,7 @@ from src.packages.mongodb import lifespan
 from src.packages.models import AuthorizationResponse, Token, Plant
 from urllib.parse import urlencode
 from httpx import AsyncClient
+import re
 
 app = FastAPI(lifespan=lifespan)
 
@@ -67,6 +68,34 @@ async def get_current_user(session_id: str = Depends(get_current_session)):
         )
 
     return session["user_id"]
+
+
+def validate_date(date_string):
+    # 1. check date is correct format: dd-mm-yyyy
+    date_format_regex = r"(0[1-9]|[12]\d|3[01])-(0[1-9]|1[1,2])-(19|20)\d{2}"
+    if not re.match(date_format_regex, date_string):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: must be in the format dd-mm-yyyy",
+        )
+
+    # 2. check date is an actual date
+    try:
+        datetime.strptime(date_string, "%d-%m-%Y")
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: " + repr(error),
+        )
+
+    # 3. check date is today or in past
+    if datetime.strptime(date_string, "%d-%m-%Y").date() > date.today():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: cannot be in the future",
+        )
+
+    return date_string
 
 
 @app.get("/login")
@@ -235,20 +264,27 @@ async def add_plant(plant_id: str, user_id: str = Depends(get_current_user)):
     return {"id": plant_id, **plant_to_add}
 
 
-@app.get("/user/plants")
-async def get_plants(when: str = "today", user_id: str = Depends(get_current_user)):
-    todays_date = date.today().strftime("%d-%m-%Y")
+@app.get("/user/day-plants")
+async def get_daily_plants(
+    when: str = "today", user_id: str = Depends(get_current_user)
+):
 
     if when == "today":
-        plant_key = "plants.%s" % todays_date
+        the_date = date.today().strftime("%d-%m-%Y")
+    elif when == "yesterday":
+        the_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    else:
+        the_date = validate_date(when)
+
+    plant_key = f"plants.{the_date}"
 
     list_of_plants = await app.mongodb["users"].find_one(
         {"_id": user_id}, {"_id": 0, plant_key: 1}
     )
 
-    if todays_date in list_of_plants["plants"]:
+    if the_date in list_of_plants["plants"]:
         plants_list = []
-        for key, value in list_of_plants["plants"][todays_date].items():
+        for key, value in list_of_plants["plants"][the_date].items():
             plants_list.append({"_id": key, **value})
         return plants_list
     else:

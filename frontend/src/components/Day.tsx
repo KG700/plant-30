@@ -15,7 +15,7 @@ export function Day() {
     if (!token) navigate("/login");
     try {
       const data = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/user/plants?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/day-plants?when=today`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
