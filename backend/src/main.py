@@ -11,6 +11,7 @@ from src.packages.mongodb import lifespan
 from src.packages.models import AuthorizationResponse, Token, Plant
 from urllib.parse import urlencode
 from httpx import AsyncClient
+import re
 
 app = FastAPI(lifespan=lifespan)
 
@@ -71,6 +72,12 @@ async def get_current_user(session_id: str = Depends(get_current_session)):
 
 def validate_date(date_string):
     # 1. check date is correct format: dd-mm-yyyy
+    date_format_regex = r"(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[1,2])-(19|20)\d{2}"
+    if not re.match(date_format_regex, date_string):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: must be in the format dd-mm-yyyy",
+        )
 
     # 2. check date is today or in past
     if datetime.strptime(date_string, "%d-%m-%Y").date() > date.today():
