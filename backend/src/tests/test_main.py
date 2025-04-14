@@ -822,13 +822,94 @@ async def test_get_week_plants_success_today(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/week-plants", headers=headers)
+    response = client.get("/user/week-plants?when=today", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == [
         {"_id": "plant1", "name": "apple"},
         {"_id": "plant2", "name": "pear"},
         {"_id": "plant3", "name": "carrot"},
+    ]
+
+
+async def test_get_week_plants_success_yesterday(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    todays_date = date.today().strftime("%d-%m-%Y")
+    yesterdays_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    two_days_ago_date = (date.today() - timedelta(days=2)).strftime("%d-%m-%Y")
+
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            todays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}},
+            yesterdays_date: {
+                "plant1": {"name": "apple"},
+                "plant3": {"name": "carrot"},
+            },
+            two_days_ago_date: {
+                "plant1": {"name": "apple"},
+                "plant4": {"name": "potato"},
+            },
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/week-plants?when=yesterday", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant3", "name": "carrot"},
+        {"_id": "plant4", "name": "potato"},
+    ]
+
+
+async def test_get_week_plants_success_date(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    a_date = "10-04-2025"
+
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            a_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}},
+            "09-04-2025": {
+                "plant1": {"name": "apple"},
+                "plant3": {"name": "carrot"},
+            },
+            "08-04-2025": {
+                "plant1": {"name": "apple"},
+                "plant4": {"name": "potato"},
+            },
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get(f"/user/week-plants?{a_date}", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
+        {"_id": "plant3", "name": "carrot"},
+        {"_id": "plant4", "name": "potato"},
     ]
 
 

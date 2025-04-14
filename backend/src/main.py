@@ -309,14 +309,18 @@ async def get_weekly_plants(
 ):
 
     if when == "today":
-        first_date = datetime.now(timezone.utc)
+        the_date = datetime.now(timezone.utc)
+    elif when == "yesterday":
+        the_date = datetime.now(timezone.utc) - timedelta(days=1)
+    else:
+        the_date = datetime.strptime(validate_date(when), "%d-%m-%Y")
 
     week_dates = []
     projection = {"_id": 0}
     for i in range(7):
-        date = (first_date - timedelta(days=i)).strftime("%d-%m-%Y")
-        week_dates.append(date)
-        projection[f"plants.{date}"] = 1
+        day_of_week = (the_date - timedelta(days=i)).strftime("%d-%m-%Y")
+        week_dates.append(day_of_week)
+        projection[f"plants.{day_of_week}"] = 1
 
     list_of_plants = await app.mongodb["users"].find_one({"_id": user_id}, projection)
 
