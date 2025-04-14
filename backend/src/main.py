@@ -70,7 +70,16 @@ async def get_current_user(session_id: str = Depends(get_current_session)):
 
 
 def validate_date(date_string):
-    logger.debug(date_string)
+    # 1. check date is correct format: dd-mm-yyyy
+
+    # 2. check date is today or in past
+    if datetime.strptime(date_string, "%d-%m-%Y").date() > date.today():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: cannot be in the future",
+        )
+
+    # 3. check date is an actual date
     return date_string
 
 
