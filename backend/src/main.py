@@ -72,7 +72,7 @@ async def get_current_user(session_id: str = Depends(get_current_session)):
 
 def validate_date(date_string):
     # 1. check date is correct format: dd-mm-yyyy
-    date_format_regex = r"(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[1,2])-(19|20)\d{2}"
+    date_format_regex = r"(0[1-9]|[12]\d|3[01])-(0[1-9]|1[1,2])-(19|20)\d{2}"
     if not re.match(date_format_regex, date_string):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
