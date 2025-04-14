@@ -38,7 +38,7 @@ describe("Login", () => {
     const loginButton = screen.getByRole("button", { name: /login/i });
     fireEvent.click(loginButton);
 
-    expect(global.fetch).toBeCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       `${process.env.REACT_APP_BASE_URL}/login`,
       {
         headers: {
@@ -59,7 +59,7 @@ describe("Login", () => {
     const loginButton = screen.getByRole("button", { name: /login/i });
     fireEvent.click(loginButton);
 
-    expect(global.fetch).toBeCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       `${process.env.REACT_APP_BASE_URL}/login`,
       {
         headers: {
@@ -68,7 +68,7 @@ describe("Login", () => {
       },
     );
     waitFor(() => {
-      expect(mockNavigate).toBeCalledWith("/error");
+      expect(mockNavigate).toHaveBeenCalledWith("/error");
     });
   });
 });
