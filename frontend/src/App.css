@@ -78,6 +78,6 @@ button {
   width: 6rem;
 }
 
-.home-navbar-item.active {
+.active {
   background-color: lightseagreen;
 }
