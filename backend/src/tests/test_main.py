@@ -175,7 +175,7 @@ async def test_create_plant_already_exists(client, mock_mongo):
     assert response.json() == {"detail": "Plant already exists"}
 
 
-async def test_delete_plant_success(client, mock_mongo):
+async def test_delete_plant_success_today(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
     session_data = {
@@ -202,6 +202,153 @@ async def test_delete_plant_success(client, mock_mongo):
 
     assert response.status_code == 200
     assert response.json() == {"message": "Plant successfully deleted"}
+
+
+async def test_delete_plant_success_yesterday(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_id = "67bdca3d86bc1187fad97937"
+    yesterday_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": mock_user_id,
+            "plants": {yesterday_date: {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete(
+        f"/user/delete-plant/{plant_id}?when=yesterday", headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Plant successfully deleted"}
+
+
+async def test_delete_plant_success_date(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_id = "67bdca3d86bc1187fad97937"
+
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": mock_user_id,
+            "plants": {"10-04-2025": {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete(
+        f"/user/delete-plant/{plant_id}?when=10-04-2025", headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Plant successfully deleted"}
+
+
+async def test_delete_plant_incorrect_format(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_id = "67bdca3d86bc1187fad97937"
+
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": mock_user_id,
+            "plants": {"2025-04-10": {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete(
+        f"/user/delete-plant/{plant_id}?when=2025-04-10", headers=headers
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Invalid date: must be in the format dd-mm-yyyy"
+    }
+
+
+async def test_delete_plant_date_in_future(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_id = "67bdca3d86bc1187fad97937"
+
+    future_date = (date.today() + timedelta(days=1)).strftime("%d-%m-%Y")
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": mock_user_id,
+            "plants": {future_date: {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete(
+        f"/user/delete-plant/{plant_id}?when={future_date}", headers=headers
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid date: cannot be in the future"}
+
+
+async def test_delete_plant_date_invalid(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_id = "67bdca3d86bc1187fad97937"
+
+    invalid_date = "30-02-2025"
+    await mock_mongo.db["users"].insert_one(
+        {
+            "_id": mock_user_id,
+            "plants": {invalid_date: {plant_id: {"name": "test_plant"}}},
+        }
+    )
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.delete(
+        f"/user/delete-plant/{plant_id}?when={invalid_date}", headers=headers
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Invalid date: ValueError('day is out of range for month')"
+    }
 
 
 async def test_delete_plant_plant_not_found(client, mock_mongo):
