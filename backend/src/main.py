@@ -186,11 +186,15 @@ async def create_plant(plant: Plant, user_id: str = Depends(get_current_user)):
 async def delete_plant(
     plant_id: str, when: str = "today", user_id: str = Depends(get_current_user)
 ):
-    todays_date = date.today().strftime("%d-%m-%Y")
 
     if when == "today":
-        plant_key = f"plants.{todays_date}.{plant_id}"
+        the_date = date.today().strftime("%d-%m-%Y")
+    elif when == "yesterday":
+        the_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    else:
+        the_date = validate_date(when)
 
+    plant_key = f"plants.{the_date}.{plant_id}"
     result = await app.mongodb["users"].update_one(
         {"_id": user_id}, {"$unset": {plant_key: ""}}
     )
