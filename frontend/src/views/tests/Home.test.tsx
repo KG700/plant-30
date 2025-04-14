@@ -2,7 +2,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Home } from "../Home";
 
 jest.mock("../../components/LogoutButton");
-// jest.mock("../../components/HomeNavigation");
 jest.mock("../../components/Day");
 jest.mock("../../components/Week");
 
