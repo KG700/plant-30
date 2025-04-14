@@ -36,7 +36,7 @@ export function Home() {
         <button className={isTodayActive ? "active" : ""}>Today</button>
         <HomeNavigation setIsDayView={setIsDayView} />
         <p>
-          Plants eaten:
+          Plants eaten:{' '}
           <span style={{ fontWeight: "bold" }}>
             {!isDayView && ` ${getFormattedDate(getWeekAgoDate())} -`}
             {` ${getFormattedDate(getDate())}`}
