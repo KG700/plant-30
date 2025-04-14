@@ -484,6 +484,27 @@ async def test_get_daily_plants_date_in_future(client, mock_mongo):
     assert response.json() == {"detail": "Invalid date: cannot be in the future"}
 
 
+async def test_get_daily_plants_date_invalid(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    invalid_date = "30-02-2025"
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get(f"/user/day-plants?when={invalid_date}", headers=headers)
+
+    assert response.status_code == 400
+    assert response.json() == {
+        "detail": "Invalid date: ValueError('day is out of range for month')"
+    }
+
+
 async def test_get_daily_plants_empty(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"

@@ -79,14 +79,22 @@ def validate_date(date_string):
             detail="Invalid date: must be in the format dd-mm-yyyy",
         )
 
-    # 2. check date is today or in past
+    # 2. check date is an actual date
+    try:
+        datetime.strptime(date_string, "%d-%m-%Y")
+    except Exception as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date: " + repr(error),
+        )
+
+    # 3. check date is today or in past
     if datetime.strptime(date_string, "%d-%m-%Y").date() > date.today():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid date: cannot be in the future",
         )
 
-    # 3. check date is an actual date
     return date_string
 
 
