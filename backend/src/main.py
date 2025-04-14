@@ -137,7 +137,7 @@ async def verify_authorisation(body: AuthorizationResponse, response: Response):
 @app.post("/create-plant", response_model=Plant, status_code=201)
 async def create_plant(plant: Plant, user_id: str = Depends(get_current_user)):
     is_plant_in_db = await app.mongodb["plants"].count_documents(
-        {"name": {"$regex": plant.name, "$options": "i"}}
+        {"name": {"$regex": rf"^{plant.name}$", "$options": "i"}}
     )
 
     if is_plant_in_db > 0:

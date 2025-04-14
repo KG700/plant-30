@@ -111,10 +111,43 @@ async def test_create_plant_success(client, mock_mongo):
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
     response = client.post("/create-plant", json=plant_data, headers=headers)
 
+    assert response.status_code == 201
+
     plant_id = response.json()["_id"]
+    assert response.json() == {"_id": plant_id, "name": "apple", "category": "fruit"}
+
+
+async def test_create_plant_success_name_subset_of_existing_plant(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": "mock_user_id",
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    plant_data = {
+        "_id": "64e10a1b9d708654778a1337",
+        "name": "sweet potato",
+        "category": "vegetable",
+    }
+    await mock_mongo.db["plants"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.post(
+        "/create-plant",
+        json={"name": "potato", "category": "vegetable"},
+        headers=headers,
+    )
 
     assert response.status_code == 201
-    assert response.json() == {"_id": plant_id, "name": "apple", "category": "fruit"}
+
+    plant_id = response.json()["_id"]
+    assert response.json() == {
+        "_id": plant_id,
+        "name": "potato",
+        "category": "vegetable",
+    }
 
 
 async def test_create_plant_already_exists(client, mock_mongo):
