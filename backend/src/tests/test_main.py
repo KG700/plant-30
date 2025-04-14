@@ -356,7 +356,7 @@ async def test_add_plant_duplicate(client, mock_mongo):
     assert response.json() == {"detail": "Plant already exists in user's collection"}
 
 
-async def test_get_plants_today_success(client, mock_mongo):
+async def test_get_daily_plants_today_success(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
     session_data = {
@@ -376,7 +376,7 @@ async def test_get_plants_today_success(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/day-plants", headers=headers)
+    response = client.get("/user/day-plants?when=today", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == [
@@ -385,7 +385,36 @@ async def test_get_plants_today_success(client, mock_mongo):
     ]
 
 
-async def test_get_plants_empty(client, mock_mongo):
+async def test_get_daily_plants_yesterday_success(client, mock_mongo):
+    mock_session_id = "67f509cbae80c09eb2b3f83d"
+    mock_user_id = "mock-user-id"
+    session_data = {
+        "_id": ObjectId(mock_session_id),
+        "user_id": mock_user_id,
+        "expires_in": datetime.now(timezone.utc) + timedelta(seconds=300),
+    }
+    await mock_mongo.db["sessions"].insert_one(session_data)
+
+    yesterdays_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+    plant_data = {
+        "_id": mock_user_id,
+        "plants": {
+            yesterdays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}}
+        },
+    }
+    await mock_mongo.db["users"].insert_one(plant_data)
+
+    headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
+    response = client.get("/user/day-plants?when=yesterday", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"_id": "plant1", "name": "apple"},
+        {"_id": "plant2", "name": "pear"},
+    ]
+
+
+async def test_get_daily_plants_empty(client, mock_mongo):
     mock_session_id = "67f509cbae80c09eb2b3f83d"
     mock_user_id = "mock-user-id"
     session_data = {

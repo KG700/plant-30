@@ -241,16 +241,19 @@ async def get_daily_plants(
 ):
 
     if when == "today":
-        todays_date = date.today().strftime("%d-%m-%Y")
-        plant_key = "plants.%s" % todays_date
+        the_date = date.today().strftime("%d-%m-%Y")
+        plant_key = "plants.%s" % the_date
+    elif when == "yesterday":
+        the_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+        plant_key = "plants.%s" % the_date
 
     list_of_plants = await app.mongodb["users"].find_one(
         {"_id": user_id}, {"_id": 0, plant_key: 1}
     )
 
-    if todays_date in list_of_plants["plants"]:
+    if the_date in list_of_plants["plants"]:
         plants_list = []
-        for key, value in list_of_plants["plants"][todays_date].items():
+        for key, value in list_of_plants["plants"][the_date].items():
             plants_list.append({"_id": key, **value})
         return plants_list
     else:
