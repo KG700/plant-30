@@ -235,11 +235,13 @@ async def add_plant(plant_id: str, user_id: str = Depends(get_current_user)):
     return {"id": plant_id, **plant_to_add}
 
 
-@app.get("/user/plants")
-async def get_plants(when: str = "today", user_id: str = Depends(get_current_user)):
-    todays_date = date.today().strftime("%d-%m-%Y")
+@app.get("/user/day-plants")
+async def get_daily_plants(
+    when: str = "today", user_id: str = Depends(get_current_user)
+):
 
     if when == "today":
+        todays_date = date.today().strftime("%d-%m-%Y")
         plant_key = "plants.%s" % todays_date
 
     list_of_plants = await app.mongodb["users"].find_one(

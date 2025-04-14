@@ -376,7 +376,7 @@ async def test_get_plants_today_success(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == [
@@ -399,7 +399,7 @@ async def test_get_plants_empty(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == []
@@ -458,7 +458,7 @@ async def test_get_current_user_invalid_scheme(client, mock_mongo):
     headers = {
         "Authorization": f"{invalid_scheme} mocked_access_token:{mock_session_id}"
     }
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid authentication scheme"}
@@ -480,7 +480,7 @@ async def test_get_current_user_missing_credentials(client, mock_mongo):
     missing_credentials = "null"
 
     headers = {"Authorization": f"Bearer {missing_credentials}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid authentication credentials"}
@@ -494,7 +494,7 @@ async def test_get_current_user_session_not_found(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Session not found"}
@@ -514,7 +514,7 @@ async def test_get_current_user_session_expired(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get("/user/plants", headers=headers)
+    response = client.get("/user/day-plants", headers=headers)
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Session expired"}
