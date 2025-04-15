@@ -38,6 +38,6 @@ repos:
   hooks:
     - id: eslint
       name: Run ESLint
-      entry: cd frontend && npm run lint:fix
+      entry: cd frontend && npm run lint
       language: system
-      files: \.(ts|tsx|mjs)$
+      files: frontend/.*\.(ts|tsx|mjs)$
