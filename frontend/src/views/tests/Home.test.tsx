@@ -25,11 +25,11 @@ describe("Home", () => {
     render(<Home />);
 
     const yesterdayButton = screen.getByRole("button", { name: /Yesterday/i });
-    fireEvent.click(yesterdayButton)
+    fireEvent.click(yesterdayButton);
 
     await waitFor(() => {
       expect(screen.queryByText("Wednesday, 9 April 2025")).toBeInTheDocument();
-    })
+    });
   });
 
   it("displays week start and end dates when Week is selected", async () => {
