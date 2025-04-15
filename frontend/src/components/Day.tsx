@@ -5,7 +5,7 @@ import { EnterPlantInput } from "./EnterPlantInput";
 import "../App.css";
 
 interface DayProps {
-  pageDate: "today" | "yesterday" | string;
+  pageDate: string;
 }
 
 export function Day({ pageDate }: Readonly<DayProps>) {

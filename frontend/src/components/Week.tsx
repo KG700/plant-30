@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { CategoryLabels, Plant, categoryLabelMap } from "../types";
 
 interface WeekProps {
-  pageDate: "today" | "yesterday" | string;
+  pageDate: string;
 }
 
 export function Week({ pageDate }: Readonly<WeekProps>) {
