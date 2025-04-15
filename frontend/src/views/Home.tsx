@@ -19,13 +19,14 @@ export function Home() {
     return date.toLocaleDateString("en-GB", options);
   }
 
-  function getFormattedDate(date: Date){
-    const now = new Date();
-    const today = now.setHours(0,0,0,0);
-    const yesterday = (new Date(now.setDate(now.getDate() - 1))).setHours(0,0,0,0);
+  function getFormattedDate(date: Date) {
+    const nowDate = new Date();
+    const today = nowDate.setHours(0, 0, 0, 0);
+    if (date.setHours(0, 0, 0, 0) === today) return "today";
 
-    if (date.setHours(0,0,0,0) === today) return 'today';
-    if (date.setHours(0,0,0,0) === yesterday) return 'yesterday';
+    const yesterdayDate = new Date(nowDate.setDate(nowDate.getDate() - 1));
+    const yesterday = yesterdayDate.setHours(0, 0, 0, 0);
+    if (date.setHours(0, 0, 0, 0) === yesterday) return "yesterday";
 
     const day = `0${date.getDate()}`.slice(-2);
     const month = `0${date.getMonth()}`.slice(-2);
@@ -39,7 +40,7 @@ export function Home() {
     if (isTodayActive) {
       return now;
     }
-    return new Date(now.setDate(now.getDate() - 1))
+    return new Date(now.setDate(now.getDate() - 1));
   }
 
   function getWeekAgoDate(pageDate: Date) {
@@ -52,8 +53,18 @@ export function Home() {
         <LogoutButton />
         <h1>30 Plants</h1>
         <nav>
-          <button className={!isTodayActive ? "active" : ""} onClick={() => setIsTodayActive(false)}>Yesterday</button>
-          <button className={isTodayActive ? "active" : ""} onClick={() => setIsTodayActive(true)}>Today</button>
+          <button
+            className={!isTodayActive ? "active" : ""}
+            onClick={() => setIsTodayActive(false)}
+          >
+            Yesterday
+          </button>
+          <button
+            className={isTodayActive ? "active" : ""}
+            onClick={() => setIsTodayActive(true)}
+          >
+            Today
+          </button>
         </nav>
         <HomeNavigation setIsDayView={setIsDayView} />
         <p>
@@ -63,7 +74,11 @@ export function Home() {
             {` ${getDisplayDate(getDate())}`}
           </span>
         </p>
-        {isDayView ? <Day pageDate={getFormattedDate(getDate())}/> : <Week pageDate={getFormattedDate(getDate())}/>}
+        {isDayView ? (
+          <Day pageDate={getFormattedDate(getDate())} />
+        ) : (
+          <Week pageDate={getFormattedDate(getDate())} />
+        )}
       </header>
     </div>
   );

@@ -37,7 +37,9 @@ describe("EnterPlantInput", () => {
   it("submits plant when entered", async () => {
     const mockOnPlantAdded = jest.fn();
 
-    render(<EnterPlantInput pageDate="today" onPlantAdded={mockOnPlantAdded} />);
+    render(
+      <EnterPlantInput pageDate="today" onPlantAdded={mockOnPlantAdded} />,
+    );
 
     const inputField: HTMLInputElement = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);

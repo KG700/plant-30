@@ -42,7 +42,7 @@ describe("Day", () => {
   });
 
   it("fetches and renders plants", async () => {
-    render(<Day pageDate="10-04-2025"/>);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(screen.getByText("rice")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("Day", () => {
   });
 
   it("calls delete endpoint when plant delete button pressed", async () => {
-    render(<Day pageDate="today"/>);
+    render(<Day pageDate="today" />);
 
     await waitFor(() => {
       const onionItem: HTMLLIElement =
@@ -93,7 +93,7 @@ describe("Day", () => {
       })
       .mockRejectedValue("Failed to delete");
 
-    render(<Day pageDate="today"/>);
+    render(<Day pageDate="today" />);
 
     await waitFor(() => {
       const onionItem: HTMLLIElement =
@@ -126,7 +126,7 @@ describe("Day", () => {
       }),
     );
 
-    render(<Day pageDate="10-04-2025"/>);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(screen.getByText("Total: 0")).toBeInTheDocument();
@@ -139,7 +139,7 @@ describe("Day", () => {
   it("throws error if plants fail to fetch", async () => {
     (global.fetch as jest.Mock).mockRejectedValue("Error fetching plants");
 
-    render(<Day pageDate="10-04-2025"/>);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(

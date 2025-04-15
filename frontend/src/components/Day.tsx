@@ -31,10 +31,10 @@ export function Day({ pageDate }: Readonly<DayProps>) {
 
       if (!data.ok) {
         if (data.status === 401) navigate("/login");
-        throw new Error(await data.json())
+        throw new Error(await data.json());
       }
 
-      const plantsData = await data.json() as Plant[];
+      const plantsData = (await data.json()) as Plant[];
 
       setIsFetchError(false);
       setIsDeleteError(false);
