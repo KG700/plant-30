@@ -22,6 +22,7 @@ describe("Day", () => {
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
     (global.fetch as jest.Mock) = jest.fn(() =>
       Promise.resolve({
+        ok: true,
         json: () =>
           Promise.resolve([
             { _id: 1, name: "rice" },
@@ -41,7 +42,7 @@ describe("Day", () => {
   });
 
   it("fetches and renders plants", async () => {
-    render(<Day />);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(screen.getByText("rice")).toBeInTheDocument();
@@ -51,7 +52,7 @@ describe("Day", () => {
   });
 
   it("calls delete endpoint when plant delete button pressed", async () => {
-    render(<Day />);
+    render(<Day pageDate="today" />);
 
     await waitFor(() => {
       const onionItem: HTMLLIElement =
@@ -92,7 +93,7 @@ describe("Day", () => {
       })
       .mockRejectedValue("Failed to delete");
 
-    render(<Day />);
+    render(<Day pageDate="today" />);
 
     await waitFor(() => {
       const onionItem: HTMLLIElement =
@@ -125,7 +126,7 @@ describe("Day", () => {
       }),
     );
 
-    render(<Day />);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(screen.getByText("Total: 0")).toBeInTheDocument();
@@ -138,7 +139,7 @@ describe("Day", () => {
   it("throws error if plants fail to fetch", async () => {
     (global.fetch as jest.Mock).mockRejectedValue("Error fetching plants");
 
-    render(<Day />);
+    render(<Day pageDate="10-04-2025" />);
 
     await waitFor(() => {
       expect(

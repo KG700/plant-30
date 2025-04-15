@@ -4,10 +4,14 @@ import { Plant } from "../types";
 import { CreateNewPlant } from "./CreateNewPlant";
 
 type PlantInputProps = {
+  pageDate: string;
   onPlantAdded: () => void;
 };
 
-export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
+export function EnterPlantInput({
+  pageDate,
+  onPlantAdded,
+}: Readonly<PlantInputProps>) {
   const navigate = useNavigate();
   const [plantList, setPlantList] = useState<Plant[]>([]);
   const [isError, setIsError] = useState(false);
@@ -103,7 +107,7 @@ export function EnterPlantInput({ onPlantAdded }: Readonly<PlantInputProps>) {
     setEnteredPlant("");
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/user/add-plant/${plant._id}`,
+        `${process.env.REACT_APP_BASE_URL}/user/add-plant/${plant._id}?when=${pageDate}`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
