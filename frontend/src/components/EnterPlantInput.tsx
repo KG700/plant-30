@@ -4,7 +4,7 @@ import { Plant } from "../types";
 import { CreateNewPlant } from "./CreateNewPlant";
 
 type PlantInputProps = {
-  pageDate: "today" | "yesterday" | string;
+  pageDate: string;
   onPlantAdded: () => void;
 };
 
