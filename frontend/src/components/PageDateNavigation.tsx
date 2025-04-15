@@ -8,7 +8,7 @@ interface PageDateNavigationProps {
 export function PageDateNavigation({
   daysAgoActive,
   setDaysAgoActive,
-}: PageDateNavigationProps) {
+}: Readonly<PageDateNavigationProps>) {
   function getDateButtonLabel(date: Date) {
     const options: Intl.DateTimeFormatOptions = {
       weekday: "short",
@@ -16,6 +16,10 @@ export function PageDateNavigation({
     };
 
     return date.toLocaleDateString("en-GB", options);
+  }
+
+  function getStaticButtonLabel(daysAgo: 0 | 1) {
+    return daysAgo === 0 ? "Today" : "Yesterday";
   }
 
   function getNavButtons() {
@@ -28,11 +32,9 @@ export function PageDateNavigation({
             onClick={() => setDaysAgoActive(day)}
             key={day}
           >
-            {day === 0
-              ? "Today"
-              : day === 1
-                ? "Yesterday"
-                : getDateButtonLabel(getDate(day))}
+            {day == 0 || day == 1
+              ? getStaticButtonLabel(day)
+              : getDateButtonLabel(getDate(day))}
           </button>
         ))}
       </>
