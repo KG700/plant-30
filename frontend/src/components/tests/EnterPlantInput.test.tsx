@@ -37,7 +37,7 @@ describe("EnterPlantInput", () => {
   it("submits plant when entered", async () => {
     const mockOnPlantAdded = jest.fn();
 
-    render(<EnterPlantInput onPlantAdded={mockOnPlantAdded} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={mockOnPlantAdded} />);
 
     const inputField: HTMLInputElement = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
@@ -49,7 +49,7 @@ describe("EnterPlantInput", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
+        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1?when=today`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
@@ -86,7 +86,7 @@ describe("EnterPlantInput", () => {
         "Failed to add apple to your plants. Please try again.",
       );
 
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
 
     const inputField: HTMLInputElement = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
@@ -98,7 +98,7 @@ describe("EnterPlantInput", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
+        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1?when=today`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
@@ -134,7 +134,7 @@ describe("EnterPlantInput", () => {
           }),
       });
 
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
 
     const inputField: HTMLInputElement = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
@@ -157,14 +157,14 @@ describe("EnterPlantInput", () => {
   });
 
   it("updates enteredPlant state when input changes", () => {
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
     const inputField: HTMLInputElement = screen.getByLabelText("enter-plant");
     fireEvent.change(inputField, { target: { value: "app" } });
     expect(inputField.value).toBe("app");
   });
 
   it("opens the dropdown when input is clicked", async () => {
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
     const inputField = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
     await waitFor(() => {
@@ -173,7 +173,7 @@ describe("EnterPlantInput", () => {
   });
 
   it("closes the dropdown when clicking outside", async () => {
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
     const inputField = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
     await waitFor(() => {
@@ -184,7 +184,7 @@ describe("EnterPlantInput", () => {
   });
 
   it("fetches plants when input changes", async () => {
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
 
     const inputField = screen.getByLabelText("enter-plant");
     fireEvent.change(inputField, { target: { value: "ap" } });
@@ -200,7 +200,7 @@ describe("EnterPlantInput", () => {
   it("displays error message if fetching plants fails", async () => {
     (global.fetch as jest.Mock) = jest.fn(() => Promise.reject("Fetch Error"));
 
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
 
     const inputField = screen.getByLabelText("enter-plant");
     fireEvent.click(inputField);
@@ -211,7 +211,7 @@ describe("EnterPlantInput", () => {
   });
 
   it("submits a plant on pressing Enter or Space on a dropdown item", async () => {
-    render(<EnterPlantInput onPlantAdded={jest.fn} />);
+    render(<EnterPlantInput pageDate="today" onPlantAdded={jest.fn} />);
 
     // Open the dropdown
     const inputField = screen.getByLabelText("enter-plant");
@@ -232,7 +232,7 @@ describe("EnterPlantInput", () => {
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1`,
+        `${process.env.REACT_APP_BASE_URL}/user/add-plant/1?when=today`,
         expect.any(Object),
       );
     });

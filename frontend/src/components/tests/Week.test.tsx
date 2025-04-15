@@ -20,7 +20,7 @@ describe("Week", () => {
   });
 
   it("fetches and renders plants", async () => {
-    render(<Week />);
+    render(<Week pageDate="today"/>);
 
     await waitFor(() => {
       expect(screen.getByText("Grains")).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("Week", () => {
       }),
     );
 
-    render(<Week />);
+    render(<Week pageDate="today"/>);
 
     await waitFor(() => {
       expect(screen.getByText("Total: 0")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("Week", () => {
   it("throws error if plants fail to fetch", async () => {
     (global.fetch as jest.Mock).mockRejectedValue("Error fetching plants");
 
-    render(<Week />);
+    render(<Week pageDate="today"/>);
 
     await waitFor(() => {
       expect(

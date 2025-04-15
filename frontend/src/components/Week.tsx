@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { CategoryLabels, Plant, categoryLabelMap } from "../types";
 
-export function Week() {
+interface WeekProps {
+  pageDate: "today" | "yesterday" | string;
+}
+
+export function Week({ pageDate }: Readonly<WeekProps>) {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isFetchError, setIsFetchError] = useState(false);
@@ -11,7 +15,7 @@ export function Week() {
     const token = localStorage.getItem("token");
     try {
       const data = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/user/week-plants?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/week-plants?when=${pageDate}`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
@@ -35,7 +39,7 @@ export function Week() {
 
   useEffect(() => {
     fetchPlants();
-  }, []);
+  }, [pageDate]);
 
   function listPlants() {
     if (isFetchError) {

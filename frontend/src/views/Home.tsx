@@ -6,9 +6,9 @@ import { HomeNavigation } from "../components/HomeNavigation";
 
 export function Home() {
   const [isDayView, setIsDayView] = useState(true);
-  const [isTodayActive] = useState(true);
+  const [isTodayActive, setIsTodayActive] = useState(true);
 
-  function getFormattedDate(date: Date) {
+  function getDisplayDate(date: Date) {
     const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       day: "numeric",
@@ -19,13 +19,31 @@ export function Home() {
     return date.toLocaleDateString("en-GB", options);
   }
 
-  function getDate() {
-    return new Date();
+  function getFormattedDate(date: Date){
+    const now = new Date();
+    const today = now.setHours(0,0,0,0);
+    const yesterday = (new Date(now.setDate(now.getDate() - 1))).setHours(0,0,0,0);
+
+    if (date.setHours(0,0,0,0) === today) return 'today';
+    if (date.setHours(0,0,0,0) === yesterday) return 'yesterday';
+
+    const day = `0${date.getDate()}`.slice(-2);
+    const month = `0${date.getMonth()}`.slice(-2);
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
   }
 
-  function getWeekAgoDate() {
+  function getDate() {
     const now = new Date();
-    return new Date(now.setDate(now.getDate() - 6));
+    if (isTodayActive) {
+      return now;
+    }
+    return new Date(now.setDate(now.getDate() - 1))
+  }
+
+  function getWeekAgoDate(pageDate: Date) {
+    return new Date(pageDate.setDate(pageDate.getDate() - 6));
   }
 
   return (
@@ -33,16 +51,19 @@ export function Home() {
       <header className="App-header">
         <LogoutButton />
         <h1>30 Plants</h1>
-        <button className={isTodayActive ? "active" : ""}>Today</button>
+        <nav>
+          <button className={!isTodayActive ? "active" : ""} onClick={() => setIsTodayActive(false)}>Yesterday</button>
+          <button className={isTodayActive ? "active" : ""} onClick={() => setIsTodayActive(true)}>Today</button>
+        </nav>
         <HomeNavigation setIsDayView={setIsDayView} />
         <p>
           Plants eaten:{" "}
           <span style={{ fontWeight: "bold" }}>
-            {!isDayView && ` ${getFormattedDate(getWeekAgoDate())} -`}
-            {` ${getFormattedDate(getDate())}`}
+            {!isDayView && ` ${getDisplayDate(getWeekAgoDate(getDate()))} -`}
+            {` ${getDisplayDate(getDate())}`}
           </span>
         </p>
-        {isDayView ? <Day /> : <Week />}
+        {isDayView ? <Day pageDate={getFormattedDate(getDate())}/> : <Week pageDate={getFormattedDate(getDate())}/>}
       </header>
     </div>
   );

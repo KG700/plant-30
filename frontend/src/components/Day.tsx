@@ -4,7 +4,11 @@ import { Plant } from "../types";
 import { EnterPlantInput } from "./EnterPlantInput";
 import "../App.css";
 
-export function Day() {
+interface DayProps {
+  pageDate: "today" | "yesterday" | string;
+}
+
+export function Day({ pageDate }: Readonly<DayProps>) {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [isFetchError, setIsFetchError] = useState(false);
@@ -15,7 +19,7 @@ export function Day() {
     if (!token) navigate("/login");
     try {
       const data = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/user/day-plants?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/day-plants?when=${pageDate}`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
@@ -27,8 +31,10 @@ export function Day() {
 
       if (!data.ok) {
         if (data.status === 401) navigate("/login");
+        throw new Error(await data.json())
       }
-      const plantsData = await data.json();
+
+      const plantsData = await data.json() as Plant[];
 
       setIsFetchError(false);
       setIsDeleteError(false);
@@ -36,12 +42,13 @@ export function Day() {
     } catch (error) {
       console.log({ error });
       setIsFetchError(true);
+      setPlants([]);
     }
   };
 
   useEffect(() => {
     fetchPlants();
-  }, []);
+  }, [pageDate]);
 
   function listPlants() {
     if (isFetchError) {
@@ -74,7 +81,7 @@ export function Day() {
     setIsDeleteError(false);
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/user/delete-plant/${plant_id}?when=today`,
+        `${process.env.REACT_APP_BASE_URL}/user/delete-plant/${plant_id}?when=${pageDate}`,
         {
           headers: {
             "Access-Control-Allow-Origin": process.env.REACT_APP_ORIGIN ?? "",
@@ -99,7 +106,7 @@ export function Day() {
     <div className="App" data-testid="today-view">
       <main className="App-main">
         <h2>Total: {plants.length}</h2>
-        <EnterPlantInput onPlantAdded={fetchPlants} />
+        <EnterPlantInput pageDate={pageDate} onPlantAdded={fetchPlants} />
         {isDeleteError && <p>Failed to delete plant from list</p>}
         {listPlants()}
       </main>
