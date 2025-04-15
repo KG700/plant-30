@@ -902,7 +902,7 @@ async def test_get_week_plants_success_date(client, mock_mongo):
     await mock_mongo.db["users"].insert_one(plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
-    response = client.get(f"/user/week-plants?{a_date}", headers=headers)
+    response = client.get(f"/user/week-plants?when={a_date}", headers=headers)
 
     assert response.status_code == 200
     assert response.json() == [
