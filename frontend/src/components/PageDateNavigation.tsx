@@ -1,4 +1,5 @@
 import { getDate } from "../utils";
+import { Calendar } from "../components/Calendar";
 
 interface PageDateNavigationProps {
   daysAgoActive: number;
@@ -25,7 +26,11 @@ export function PageDateNavigation({
   function getNavButtons() {
     const days = [6, 5, 4, 3, 2, 1, 0];
     return (
-      <>
+      <div style={{ display: "flex" }}>
+        <Calendar
+          daysAgoActive={daysAgoActive}
+          setDaysAgoActive={setDaysAgoActive}
+        />
         {days.map((day: number) => (
           <button
             className={daysAgoActive === day ? "active" : ""}
@@ -37,7 +42,7 @@ export function PageDateNavigation({
               : getDateButtonLabel(getDate(day))}
           </button>
         ))}
-      </>
+      </div>
     );
   }
 
