@@ -10,17 +10,19 @@ interface CalendarProps {
   setDaysAgoActive: (daysAgo: number) => void;
 }
 
-interface CustomInputProps {
+interface CalendarButtonProps {
   value?: string;
   onClick: () => void;
-  className?: string;
 }
 
-export function Calendar({ daysAgoActive, setDaysAgoActive }: CalendarProps) {
+export function Calendar({
+  daysAgoActive,
+  setDaysAgoActive,
+}: Readonly<CalendarProps>) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  function CustomInput(
-    { value, onClick }: CustomInputProps,
+  function CalendarButton(
+    { value, onClick }: CalendarButtonProps,
     ref: React.Ref<HTMLButtonElement>,
   ) {
     return (
@@ -46,17 +48,15 @@ export function Calendar({ daysAgoActive, setDaysAgoActive }: CalendarProps) {
   };
 
   return (
-    <>
-      <DatePicker
-        showIcon
-        icon={CalendarDays()}
-        dateFormat={"dd MMM yyyy"}
-        customInput={<CustomInput onClick={() => setDaysAgoActive(7)} />}
-        selected={getDate(daysAgoActive)}
-        onChange={(date) => selectDate(date)}
-        onCalendarOpen={() => setIsCalendarOpen(true)}
-        onCalendarClose={() => setIsCalendarOpen(false)}
-      />
-    </>
+    <DatePicker
+      showIcon
+      icon={CalendarDays()}
+      dateFormat={"dd MMM yyyy"}
+      customInput={<CalendarButton onClick={() => setDaysAgoActive(7)} />}
+      selected={getDate(daysAgoActive)}
+      onChange={(date) => selectDate(date)}
+      onCalendarOpen={() => setIsCalendarOpen(true)}
+      onCalendarClose={() => setIsCalendarOpen(false)}
+    />
   );
 }
