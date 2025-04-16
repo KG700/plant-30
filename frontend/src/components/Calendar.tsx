@@ -29,6 +29,7 @@ export function Calendar({ daysAgoActive, setDaysAgoActive }: CalendarProps) {
         className={`custom-input-container ${daysAgoActive > 6 ? "active" : ""}`}
         ref={ref}
         style={{ paddingLeft: "2.5rem" }}
+        data-testid="calendar-button"
       >
         {daysAgoActive > 6 ? value : " "}
         {isCalendarOpen ? ChevronUp() : ChevronDown()}
