@@ -996,8 +996,6 @@ async def test_get_user_recommendations_success(client, mock_mongo):
     }
 
     await mock_mongo.db["plants"].insert_many(plants)
-    planttest = await mock_mongo.db["plants"].find_one({"_id": plant_ids[1]})
-    print(planttest)
     await mock_mongo.db["users"].insert_one(user_plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
