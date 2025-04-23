@@ -425,10 +425,10 @@ async def get_user_recommendations(user_id: str = Depends(get_current_user)):
                 or len(recommendations[category]) < category_max[category]
             ) and i < len(sorted_popular_plants):
                 if sorted_popular_plants[i]["category"] == category:
-                    id = sorted_popular_plants[i]["_id"]
+                    plant_id = sorted_popular_plants[i]["_id"]
                     name = sorted_popular_plants[i]["name"]
                     recommendations.setdefault(category, []).append(
-                        {"_id": id, "name": name}
+                        {"_id": plant_id, "name": name}
                     )
                 i += 1
 
