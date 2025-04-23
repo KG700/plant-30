@@ -196,7 +196,8 @@ async def delete_plant(
 
     plant_key = f"plants.{the_date}.{plant_id}"
     result = await app.mongodb["users"].update_one(
-        {"_id": user_id}, {"$unset": {plant_key: ""}}
+        {"_id": user_id},
+        {"$unset": {plant_key: ""}, "$inc": {f"stats.{plant_id}.count": -1}},
     )
 
     if result.modified_count == 1:
@@ -269,7 +270,16 @@ async def add_plant(
 
     await app.mongodb["users"].update_one(
         {"_id": user_id},
-        {"$set": {plant_key: plant_to_add}},
+        {"$setOnInsert": {f"stats.{plant_id}": {**plant_to_add, "count": 0}}},
+        upsert=True,
+    )
+
+    await app.mongodb["users"].update_one(
+        {"_id": user_id},
+        {
+            "$set": {plant_key: plant_to_add},
+            "$inc": {f"stats.{plant_id}.count": 1},
+        },
         upsert=True,
     )
 
@@ -337,7 +347,7 @@ async def get_weekly_plants(
 
 
 @app.get("/user/plants/recommendations")
-async def get_recommended_favourites(user_id: str = Depends(get_current_user)):
+async def get_user_recommendations(user_id: str = Depends(get_current_user)):
     weekly_plants_list = await get_weekly_plants("today", user_id)
 
     plant_ids_to_exclude = set()
