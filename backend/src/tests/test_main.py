@@ -371,10 +371,8 @@ async def test_delete_plant_plant_not_found(client, mock_mongo):
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
     response = client.delete(f"/user/delete-plant/{plant_id}", headers=headers)
 
-    assert response.status_code == 400
-    assert response.json() == {
-        "detail": "Plant not found in user's collection for the specified date"
-    }
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Unable to delete plant"}
 
 
 async def test_delete_plant_user_not_found(client, mock_mongo):
@@ -393,7 +391,7 @@ async def test_delete_plant_user_not_found(client, mock_mongo):
     response = client.delete(f"/user/delete-plant/{plant_id}", headers=headers)
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "User not found"}
+    assert response.json() == {"detail": "Unable to delete plant"}
 
 
 async def test_search_all_plants_success(client, mock_mongo):

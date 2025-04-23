@@ -196,20 +196,15 @@ async def delete_plant(
 
     plant_key = f"plants.{the_date}.{plant_id}"
     result = await app.mongodb["users"].update_one(
-        {"_id": user_id},
+        {"_id": user_id, plant_key: {"$exists": True}},
         {"$unset": {plant_key: ""}, "$inc": {f"stats.{plant_id}.count": -1}},
     )
 
     if result.modified_count == 1:
         return {"message": "Plant successfully deleted"}
-    elif result.matched_count == 1:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Plant not found in user's collection for the specified date",
-        )
     else:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Unable to delete plant"
         )
 
 
