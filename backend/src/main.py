@@ -8,7 +8,7 @@ from fastapi.security import HTTPBearer
 from src.packages.config import get_settings
 from src.packages.config import logger
 from src.packages.mongodb import lifespan
-from src.packages.models import AuthorizationResponse, Token, Plant
+from src.packages.models import AuthorizationResponse, Token, Plant, PlantCategory
 from urllib.parse import urlencode
 from httpx import AsyncClient
 import re
@@ -352,6 +352,18 @@ async def get_weekly_plants(
 
 @app.get("/user/plants/recommendations")
 async def get_user_recommendations(user_id: str = Depends(get_current_user)):
+    category_max = {
+        PlantCategory.vegetable: 30,
+        PlantCategory.fruit: 20,
+        PlantCategory.legumes: 10,
+        PlantCategory.beans: 10,
+        PlantCategory.nuts: 10,
+        PlantCategory.seeds: 10,
+        PlantCategory.grain: 10,
+        PlantCategory.herb: 5,
+        PlantCategory.spice: 5,
+    }
+
     weekly_plants_list = await get_weekly_plants("today", user_id)
 
     plant_ids_to_exclude = set()
@@ -378,10 +390,14 @@ async def get_user_recommendations(user_id: str = Depends(get_current_user)):
             plant = await app.mongodb["plants"].find_one(
                 {"_id": ObjectId(plant_stats["id"])}
             )
-            plant["_id"] = str(plant["_id"])
-            recommendations.setdefault(plant["category"], []).append(
-                {"_id": plant_stats["id"], "name": plant["name"]}
-            )
+            if (
+                plant["category"] not in recommendations
+                or len(recommendations[plant["category"]])
+                < category_max[plant["category"]]
+            ):
+                recommendations.setdefault(plant["category"], []).append(
+                    {"_id": plant_stats["id"], "name": plant["name"]}
+                )
 
     plant_ids_to_exclude_list = []
     for id in plant_ids_to_exclude:
@@ -401,29 +417,8 @@ async def get_user_recommendations(user_id: str = Depends(get_current_user)):
     )
 
     if len(sorted_popular_plants) > 0:
-        categories = [
-            "vegetable",
-            "fruit",
-            "seeds",
-            "nuts",
-            "grain",
-            "herb",
-            "spice",
-            "beans",
-            "legumes",
-        ]
-        category_max = {
-            "vegetable": 30,
-            "fruit": 20,
-            "legumes": 10,
-            "beans": 10,
-            "nuts": 10,
-            "seeds": 10,
-            "grain": 10,
-            "herb": 5,
-            "spice": 5,
-        }
-        for category in categories:
+
+        for category in PlantCategory:
             i = 0
             while (
                 category not in recommendations
