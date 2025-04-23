@@ -114,7 +114,12 @@ async def test_create_plant_success(client, mock_mongo):
     assert response.status_code == 201
 
     plant_id = response.json()["_id"]
-    assert response.json() == {"_id": plant_id, "name": "apple", "category": "fruit"}
+    assert response.json() == {
+        "_id": plant_id,
+        "name": "apple",
+        "category": "fruit",
+        "count": 0,
+    }
 
 
 async def test_create_plant_success_name_subset_of_existing_plant(client, mock_mongo):
@@ -147,6 +152,7 @@ async def test_create_plant_success_name_subset_of_existing_plant(client, mock_m
         "_id": plant_id,
         "name": "potato",
         "category": "vegetable",
+        "count": 0,
     }
 
 
@@ -921,41 +927,87 @@ async def test_get_user_recommendations_success(client, mock_mongo):
     }
     await mock_mongo.db["sessions"].insert_one(session_data)
 
+    plant_ids = [
+        "67dc23c1b6d9d292615f35d6",
+        "67dd50e6c520842302d2b3aa",
+        "67e5ca61d62ef993062bc3dd",
+        "67e42b5f4e994a217df97f37",
+        "67dddcd393d0450da19ad154",
+    ]
+    plants = [
+        {
+            "_id": ObjectId(plant_ids[0]),
+            "name": "apple",
+            "category": "fruit",
+            "count": 10,
+        },
+        {
+            "_id": ObjectId(plant_ids[1]),
+            "name": "pear",
+            "category": "fruit",
+            "count": 8,
+        },
+        {
+            "_id": ObjectId(plant_ids[2]),
+            "name": "carrot",
+            "category": "vegetable",
+            "count": 15,
+        },
+        {
+            "_id": ObjectId(plant_ids[3]),
+            "name": "banana",
+            "category": "fruit",
+            "count": 5,
+        },
+        {
+            "_id": ObjectId(plant_ids[4]),
+            "name": "broccoli",
+            "category": "vegetable",
+            "count": 7,
+        },
+    ]
     todays_date = date.today().strftime("%d-%m-%Y")
     yesterdays_date = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
     last_weeks_date = (date.today() - timedelta(days=8)).strftime("%d-%m-%Y")
-    plant_data = {
+    user_plant_data = {
         "_id": mock_user_id,
         "plants": {
-            todays_date: {"plant1": {"name": "apple"}, "plant2": {"name": "pear"}},
+            todays_date: {
+                plant_ids[0]: {"name": "apple"},
+                plant_ids[1]: {"name": "pear"},
+            },
             yesterdays_date: {
-                "plant1": {"name": "apple"},
-                "plant3": {"name": "carrot"},
+                plant_ids[0]: {"name": "apple"},
+                plant_ids[2]: {"name": "carrot"},
             },
             last_weeks_date: {
-                "plant1": {"name": "apple"},
-                "plant4": {"name": "banana"},
-                "plant5": {"name": "broccoli"},
+                plant_ids[0]: {"name": "apple"},
+                plant_ids[3]: {"name": "banana"},
+                plant_ids[4]: {"name": "broccoli"},
             },
         },
         "stats": {
-            "plant1": {"count": 3},
-            "plant2": {"count": 1},
-            "plant3": {"count": 1},
-            "plant4": {"count": 1},
-            "plant5": {"count": 2},
+            plant_ids[0]: {"count": 3},
+            plant_ids[1]: {"count": 1},
+            plant_ids[2]: {"count": 1},
+            plant_ids[3]: {"count": 1},
+            plant_ids[4]: {"count": 2},
         },
     }
-    await mock_mongo.db["users"].insert_one(plant_data)
+
+    await mock_mongo.db["plants"].insert_many(plants)
+    planttest = await mock_mongo.db["plants"].find_one({"_id": plant_ids[1]})
+    print(planttest)
+    await mock_mongo.db["users"].insert_one(user_plant_data)
 
     headers = {"Authorization": f"Bearer mocked_access_token:{mock_session_id}"}
     response = client.get("/user/plants/recommendations", headers=headers)
 
     assert response.status_code == 200
-    assert response.json() == [
-        {"plant_id": "plant5", "count": 2},
-        {"plant_id": "plant4", "count": 1},
-    ]
+    assert response.json() == {
+        "fruit": [{"_id": plant_ids[3], "name": "banana"}],
+        "vegetable": [{"_id": plant_ids[4], "name": "broccoli"}],
+    }
 
 
 async def test_get_current_user_invalid_scheme(client, mock_mongo):

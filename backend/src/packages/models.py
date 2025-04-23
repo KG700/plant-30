@@ -35,4 +35,5 @@ class Plant(BaseModel):
     id: Annotated[str, BeforeValidator(str)] = Field(alias="_id", default=None)
     name: str
     category: PlantCategory
+    count: int | None = None
     model_config = ConfigDict(populate_by_name=True)
