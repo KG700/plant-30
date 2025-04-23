@@ -8,7 +8,7 @@ from fastapi.security import HTTPBearer
 from src.packages.config import get_settings
 from src.packages.config import logger
 from src.packages.mongodb import lifespan
-from src.packages.models import AuthorizationResponse, Token, Plant
+from src.packages.models import AuthorizationResponse, Token, Plant, PlantCategory
 from urllib.parse import urlencode
 from httpx import AsyncClient
 import re
@@ -174,6 +174,8 @@ async def create_plant(plant: Plant, user_id: str = Depends(get_current_user)):
             status_code=status.HTTP_409_CONFLICT, detail="Plant already exists"
         )
 
+    plant.count = 0
+
     new_plant = await app.mongodb["plants"].insert_one(
         plant.model_dump(by_alias=True, exclude=["id"])
     )
@@ -198,6 +200,11 @@ async def delete_plant(
     result = await app.mongodb["users"].update_one(
         {"_id": user_id, plant_key: {"$exists": True}},
         {"$unset": {plant_key: ""}, "$inc": {f"stats.{plant_id}.count": -1}},
+    )
+
+    await app.mongodb["plants"].update_one(
+        {"_id": ObjectId(plant_id)},
+        {"$inc": {"count": -1}},
     )
 
     if result.modified_count == 1:
@@ -234,7 +241,7 @@ async def add_plant(
     plant_id: str, when: str = "today", user_id: str = Depends(get_current_user)
 ):
     plant_to_add = await app.mongodb["plants"].find_one(
-        {"_id": ObjectId(plant_id)}, {"_id": 0}
+        {"_id": ObjectId(plant_id)}, {"_id": 0, "count": 0}
     )
 
     if plant_to_add is None:
@@ -265,15 +272,17 @@ async def add_plant(
 
     await app.mongodb["users"].update_one(
         {"_id": user_id},
-        {"$setOnInsert": {f"stats.{plant_id}": {**plant_to_add, "count": 0}}},
-        upsert=True,
-    )
-
-    await app.mongodb["users"].update_one(
-        {"_id": user_id},
         {
             "$set": {plant_key: plant_to_add},
             "$inc": {f"stats.{plant_id}.count": 1},
+        },
+        upsert=True,
+    )
+
+    await app.mongodb["plants"].update_one(
+        {"_id": ObjectId(plant_id)},
+        {
+            "$inc": {"count": 1},
         },
         upsert=True,
     )
@@ -341,27 +350,108 @@ async def get_weekly_plants(
     return plants_list
 
 
+async def get_favourite_plants(user_id, excluded_ids):
+    all_user_plants_object = await app.mongodb["users"].find_one(
+        {"_id": user_id}, {"_id": 0, "stats": 1}
+    )
+
+    all_user_plants_list = []
+    for plant_id in all_user_plants_object["stats"]:
+        if plant_id not in excluded_ids:
+            all_user_plants_list.append(
+                {
+                    "id": plant_id,
+                    "count": all_user_plants_object["stats"][plant_id]["count"],
+                }
+            )
+
+    sorted_count = sorted(
+        all_user_plants_list, key=lambda plant: plant["count"], reverse=True
+    )
+
+    sorted_ids = []
+    for plant in sorted_count:
+        sorted_ids.append(ObjectId(plant["id"]))
+
+    fav_plants = (
+        await app.mongodb["plants"]
+        .find({"_id": {"$in": sorted_ids}}, {"count": 0})
+        .to_list(1000)
+    )
+
+    for plant in fav_plants:
+        plant["_id"] = str(plant["_id"])
+
+    return fav_plants
+
+
+async def get_popular_plants(excluded_ids):
+    plant_ids_to_exclude_list = []
+
+    for plant_id in excluded_ids:
+        plant_ids_to_exclude_list.append(ObjectId(plant_id))
+
+    plants = (
+        await app.mongodb["plants"]
+        .find({"_id": {"$not": {"$in": plant_ids_to_exclude_list}}})
+        .to_list(1000)
+    )
+
+    for plant in plants:
+        plant["_id"] = str(plant["_id"])
+
+    sorted_plants = sorted(plants, key=lambda plant: plant["count"], reverse=True)
+    return sorted_plants
+
+
 @app.get("/user/plants/recommendations")
 async def get_user_recommendations(user_id: str = Depends(get_current_user)):
+    category_max = {
+        PlantCategory.vegetable: 30,
+        PlantCategory.fruit: 20,
+        PlantCategory.legumes: 10,
+        PlantCategory.beans: 10,
+        PlantCategory.nuts: 10,
+        PlantCategory.seeds: 10,
+        PlantCategory.grain: 10,
+        PlantCategory.herb: 5,
+        PlantCategory.spice: 5,
+    }
+
     weekly_plants_list = await get_weekly_plants("today", user_id)
 
     plant_ids_to_exclude = set()
     for plant in weekly_plants_list:
         plant_ids_to_exclude.add(plant["_id"])
 
-    recommendations = []
+    user_favourites = await get_favourite_plants(user_id, plant_ids_to_exclude)
 
-    all_user_plants_list = await app.mongodb["users"].find_one(
-        {"_id": user_id}, {"_id": 0, "stats": 1}
-    )
+    for plant in user_favourites:
+        plant_ids_to_exclude.add(plant["_id"])
 
-    for plant_id in all_user_plants_list["stats"]:
-        if plant_id not in plant_ids_to_exclude:
-            recommendations.append(
-                {"plant_id": plant_id, **all_user_plants_list["stats"][plant_id]}
-            )
+    popular_plants = await get_popular_plants(plant_ids_to_exclude)
 
-    return sorted(recommendations, key=lambda plant: plant["count"], reverse=True)
+    plants = user_favourites + popular_plants
+
+    recommendations = {}
+
+    if len(plants) > 0:
+
+        for category in PlantCategory:
+            i = 0
+            while (
+                category not in recommendations
+                or len(recommendations[category]) < category_max[category]
+            ) and i < len(plants):
+                if plants[i]["category"] == category:
+                    plant_id = plants[i]["_id"]
+                    name = plants[i]["name"]
+                    recommendations.setdefault(category, []).append(
+                        {"_id": plant_id, "name": name}
+                    )
+                i += 1
+
+    return recommendations
 
 
 @app.delete("/user/logout")
