@@ -336,6 +336,29 @@ async def get_weekly_plants(
     return plants_list
 
 
+@app.get("/user/plants/recommendations")
+async def get_recommended_favourites(user_id: str = Depends(get_current_user)):
+    weekly_plants_list = await get_weekly_plants("today", user_id)
+
+    plant_ids_to_exclude = set()
+    for plant in weekly_plants_list:
+        plant_ids_to_exclude.add(plant["_id"])
+
+    recommendations = []
+
+    all_user_plants_list = await app.mongodb["users"].find_one(
+        {"_id": user_id}, {"_id": 0, "stats": 1}
+    )
+
+    for plant_id in all_user_plants_list["stats"]:
+        if plant_id not in plant_ids_to_exclude:
+            recommendations.append(
+                {"plant_id": plant_id, **all_user_plants_list["stats"][plant_id]}
+            )
+
+    return sorted(recommendations, key=lambda plant: plant["count"], reverse=True)
+
+
 @app.delete("/user/logout")
 async def logout(session_id: str = Depends(get_current_session)):
     result = await app.mongodb["sessions"].delete_one({"_id": ObjectId(session_id)})
