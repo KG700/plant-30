@@ -350,6 +350,60 @@ async def get_weekly_plants(
     return plants_list
 
 
+async def get_favourite_plants(user_id, excluded_ids):
+    all_user_plants_object = await app.mongodb["users"].find_one(
+        {"_id": user_id}, {"_id": 0, "stats": 1}
+    )
+
+    all_user_plants_list = []
+    for plant_id in all_user_plants_object["stats"]:
+        if plant_id not in excluded_ids:
+            all_user_plants_list.append(
+                {
+                    "id": plant_id,
+                    "count": all_user_plants_object["stats"][plant_id]["count"],
+                }
+            )
+
+    sorted_count = sorted(
+        all_user_plants_list, key=lambda plant: plant["count"], reverse=True
+    )
+
+    sorted_ids = []
+    for plant in sorted_count:
+        sorted_ids.append(ObjectId(plant["id"]))
+
+    fav_plants = (
+        await app.mongodb["plants"]
+        .find({"_id": {"$in": sorted_ids}}, {"count": 0})
+        .to_list(1000)
+    )
+
+    for plant in fav_plants:
+        plant["_id"] = str(plant["_id"])
+
+    return fav_plants
+
+
+async def get_popular_plants(excluded_ids):
+    plant_ids_to_exclude_list = []
+
+    for plant_id in excluded_ids:
+        plant_ids_to_exclude_list.append(ObjectId(plant_id))
+
+    plants = (
+        await app.mongodb["plants"]
+        .find({"_id": {"$not": {"$in": plant_ids_to_exclude_list}}})
+        .to_list(1000)
+    )
+
+    for plant in plants:
+        plant["_id"] = str(plant["_id"])
+
+    sorted_plants = sorted(plants, key=lambda plant: plant["count"], reverse=True)
+    return sorted_plants
+
+
 @app.get("/user/plants/recommendations")
 async def get_user_recommendations(user_id: str = Depends(get_current_user)):
     category_max = {
@@ -370,63 +424,28 @@ async def get_user_recommendations(user_id: str = Depends(get_current_user)):
     for plant in weekly_plants_list:
         plant_ids_to_exclude.add(plant["_id"])
 
-    all_user_plants_object = await app.mongodb["users"].find_one(
-        {"_id": user_id}, {"_id": 0, "stats": 1}
-    )
-    all_user_plants_list = []
-    for key in all_user_plants_object["stats"]:
-        all_user_plants_list.append(
-            {"id": key, "count": all_user_plants_object["stats"][key]["count"]}
-        )
+    user_favourites = await get_favourite_plants(user_id, plant_ids_to_exclude)
 
-    sorted_all_user_plants_list = sorted(
-        all_user_plants_list, key=lambda plant: plant["count"], reverse=True
-    )
+    for plant in user_favourites:
+        plant_ids_to_exclude.add(plant["_id"])
+
+    popular_plants = await get_popular_plants(plant_ids_to_exclude)
+
+    plants = user_favourites + popular_plants
+
     recommendations = {}
 
-    for plant_stats in sorted_all_user_plants_list:
-        if plant_stats["id"] not in plant_ids_to_exclude:
-            plant_ids_to_exclude.add(plant_stats["id"])
-            plant = await app.mongodb["plants"].find_one(
-                {"_id": ObjectId(plant_stats["id"])}
-            )
-            if (
-                plant["category"] not in recommendations
-                or len(recommendations[plant["category"]])
-                < category_max[plant["category"]]
-            ):
-                recommendations.setdefault(plant["category"], []).append(
-                    {"_id": plant_stats["id"], "name": plant["name"]}
-                )
-
-    plant_ids_to_exclude_list = []
-    for id in plant_ids_to_exclude:
-        plant_ids_to_exclude_list.append(ObjectId(id))
-
-    popular_plants = (
-        await app.mongodb["plants"]
-        .find({"_id": {"$not": {"$in": plant_ids_to_exclude_list}}})
-        .to_list(1000)
-    )
-
-    for plant in popular_plants:
-        plant["_id"] = str(plant["_id"])
-
-    sorted_popular_plants = sorted(
-        popular_plants, key=lambda plant: plant["count"], reverse=True
-    )
-
-    if len(sorted_popular_plants) > 0:
+    if len(plants) > 0:
 
         for category in PlantCategory:
             i = 0
             while (
                 category not in recommendations
                 or len(recommendations[category]) < category_max[category]
-            ) and i < len(sorted_popular_plants):
-                if sorted_popular_plants[i]["category"] == category:
-                    plant_id = sorted_popular_plants[i]["_id"]
-                    name = sorted_popular_plants[i]["name"]
+            ) and i < len(plants):
+                if plants[i]["category"] == category:
+                    plant_id = plants[i]["_id"]
+                    name = plants[i]["name"]
                     recommendations.setdefault(category, []).append(
                         {"_id": plant_id, "name": name}
                     )
