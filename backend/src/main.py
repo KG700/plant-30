@@ -423,9 +423,8 @@ async def get_user_recommendations(user_id: str = Depends(get_current_user)):
             while (
                 category not in recommendations
                 or len(recommendations[category]) < category_max[category]
-                and i < len(sorted_popular_plants)
-            ):
-                if popular_plants[i]["category"] == category:
+            ) and i < len(sorted_popular_plants):
+                if sorted_popular_plants[i]["category"] == category:
                     id = sorted_popular_plants[i]["_id"]
                     name = sorted_popular_plants[i]["name"]
                     recommendations.setdefault(category, []).append(

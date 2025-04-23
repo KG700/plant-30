@@ -933,6 +933,8 @@ async def test_get_user_recommendations_success(client, mock_mongo):
         "67e5ca61d62ef993062bc3dd",
         "67e42b5f4e994a217df97f37",
         "67dddcd393d0450da19ad154",
+        "67fab7208fd5db871761d3b8",
+        "67fbce55722c74489f8e7b14",
     ]
     plants = [
         {
@@ -964,6 +966,18 @@ async def test_get_user_recommendations_success(client, mock_mongo):
             "name": "broccoli",
             "category": "vegetable",
             "count": 7,
+        },
+        {
+            "_id": ObjectId(plant_ids[5]),
+            "name": "basil",
+            "category": "herb",
+            "count": 2,
+        },
+        {
+            "_id": ObjectId(plant_ids[6]),
+            "name": "onion",
+            "category": "vegetable",
+            "count": 12,
         },
     ]
     todays_date = date.today().strftime("%d-%m-%Y")
@@ -1004,7 +1018,11 @@ async def test_get_user_recommendations_success(client, mock_mongo):
     assert response.status_code == 200
     assert response.json() == {
         "fruit": [{"_id": plant_ids[3], "name": "banana"}],
-        "vegetable": [{"_id": plant_ids[4], "name": "broccoli"}],
+        "vegetable": [
+            {"_id": plant_ids[4], "name": "broccoli"},
+            {"_id": plant_ids[6], "name": "onion"},
+        ],
+        "herb": [{"_id": plant_ids[5], "name": "basil"}],
     }
 
 
