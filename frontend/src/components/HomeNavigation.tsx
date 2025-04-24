@@ -1,27 +1,32 @@
 import { useEffect, useState } from "react";
 
 export function HomeNavigation({
-  setIsDayView,
-}: Readonly<{ setIsDayView: (isDayView: boolean) => void }>) {
-  const [isDayActive, setIsDayActive] = useState(true);
-
+  setActiveTab,
+  activeTab,
+}: Readonly<{ setActiveTab: (activeTab: string) => void; activeTab: string }>) {
   useEffect(() => {
-    setIsDayView(isDayActive);
-  }, [isDayActive]);
+    setActiveTab(activeTab);
+  }, [activeTab]);
 
   return (
     <nav className="home-navbar">
       <button
-        className={`home-navbar-item ${isDayActive ? "active" : ""}`}
-        onClick={() => setIsDayActive(true)}
+        className={`home-navbar-item ${activeTab === "day" ? "active" : ""}`}
+        onClick={() => setActiveTab("day")}
       >
         Day
       </button>
       <button
-        className={`home-navbar-item ${!isDayActive ? "active" : ""}`}
-        onClick={() => setIsDayActive(false)}
+        className={`home-navbar-item ${activeTab === "week" ? "active" : ""}`}
+        onClick={() => setActiveTab("week")}
       >
         Week
+      </button>
+      <button
+        className={`home-navbar-item ${activeTab === "recomendations" ? "active" : ""}`}
+        onClick={() => setActiveTab("recomendations")}
+      >
+        Recommendations
       </button>
     </nav>
   );

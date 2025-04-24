@@ -5,9 +5,10 @@ import { Week } from "../components/Week";
 import { LogoutButton } from "../components/LogoutButton";
 import { HomeNavigation } from "../components/HomeNavigation";
 import { PageDateNavigation } from "../components/PageDateNavigation";
+import { Recommendations } from "../components/Recommendations";
 
 export function Home() {
-  const [isDayView, setIsDayView] = useState(true);
+  const [activeTab, setActiveTab] = useState("day");
   const [daysAgoActive, setDaysAgoActive] = useState(0);
 
   function getDisplayDate(date: Date) {
@@ -46,18 +47,21 @@ export function Home() {
           daysAgoActive={daysAgoActive}
           setDaysAgoActive={setDaysAgoActive}
         />
-        <HomeNavigation setIsDayView={setIsDayView} />
+        <HomeNavigation setActiveTab={setActiveTab} activeTab={activeTab} />
         <p>
           <span style={{ fontWeight: "bold" }}>
-            {!isDayView && ` ${getDisplayDate(getDate(daysAgoActive + 6))} -`}
+            {activeTab === "day" &&
+              ` ${getDisplayDate(getDate(daysAgoActive + 6))} -`}
             {` ${getDisplayDate(getDate(daysAgoActive))}`}
           </span>
         </p>
-        {isDayView ? (
+        {activeTab === "day" && (
           <Day pageDate={getFormattedDate(getDate(daysAgoActive))} />
-        ) : (
+        )}
+        {activeTab === "week" && (
           <Week pageDate={getFormattedDate(getDate(daysAgoActive))} />
         )}
+        {activeTab === "recommendations" && <Recommendations />}
       </header>
     </div>
   );
